@@ -1,0 +1,30 @@
+{
+  "name": "mockme",
+  "version": "0.0.1",
+  "description": "A mock service worker generator",
+  "main": "dist/mockme.js",
+  "type": "module",
+  "bin": {
+    "mockme": "src/cli/index.js"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "esbuild --bundle --format=esm  --outfile=dist/mockme.js src/index.js",
+    "build:dev": "esbuild --bundle --format=esm  --outfile=dist/mockme.js --sourcemap src/index.js --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Jose Luis De Vega Andres <joseluis.devega@gmail.com>",
+  "contributors": [
+    "Manuel Martin Prieto <manuel.martin@gmail.com>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "prettier": "^3.0.3",
+    "zod": "^3.22.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.2"
+  }
+}

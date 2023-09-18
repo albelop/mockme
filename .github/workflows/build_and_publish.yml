@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: 18.x
           cache: "npm"
+      
+      - name: Test
+        run: npm test
 
       - name: Install Dependencies
         run: npm ci

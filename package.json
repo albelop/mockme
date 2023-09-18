@@ -37,6 +37,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "vitest": "^0.34.4"
   }
 }

@@ -8,7 +8,6 @@
     "mockme": "src/cli/index.js"
   },
   "scripts": {
-    "release": "npm publish --access=public",
     "test": "npm run test"
   },
   "keywords": [],

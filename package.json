@@ -2,26 +2,41 @@
   "name": "@betheweb/mockme",
   "version": "0.0.1",
   "description": "A mock service worker generator",
-  "main": "dist/mockme.js",
+  "main": "src/index.js",
   "type": "module",
+  "module": "src/index.js",
   "bin": {
     "mockme": "src/cli/index.js"
   },
-  "scripts": {
-    "test": "npm run test"
+  "exports": {
+    ".": "./src/index.js"
   },
-  "keywords": [],
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [
+    "mockme",
+    "mocks",
+    "service worker"
+  ],
   "author": "Jose Luis De Vega Andres <joseluis.devega@gmail.com>",
   "contributors": [
     "Manuel Martin Prieto <manuel.martin@gmail.com>"
   ],
   "license": "MIT",
+  "files": [
+    "src",
+    "!**/test/*"
+  ],
   "dependencies": {
     "commander": "^11.0.0",
+    "cookie": "^0.5.0",
+    "esbuild": "^0.19.3",
+    "path-to-regexp": "^6.2.1",
     "prettier": "^3.0.3",
     "zod": "^3.22.2"
   },
   "devDependencies": {
-    "esbuild": "^0.19.2"
+    "vitest": "^0.34.4"
   }
 }

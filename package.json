@@ -8,10 +8,8 @@
     "mockme": "src/cli/index.js"
   },
   "scripts": {
-    "prebuild": "rm -rf dist",
-    "build": "esbuild --bundle --format=esm  --outfile=dist/mockme.js src/index.js",
-    "build:dev": "esbuild --bundle --format=esm  --outfile=dist/mockme.js --sourcemap src/index.js --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "release": "npm publish",
+    "test": "npm run test"
   },
   "keywords": [],
   "author": "Jose Luis De Vega Andres <joseluis.devega@gmail.com>",

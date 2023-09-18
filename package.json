@@ -1,5 +1,5 @@
 {
-  "name": "mockme",
+  "name": "@betheweb/mockme",
   "version": "0.0.1",
   "description": "A mock service worker generator",
   "main": "dist/mockme.js",

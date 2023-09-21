@@ -1,10 +1,15 @@
 import { Command } from "commander";
 import getPackageInfo from "./utils/getPackageInfo.js";
-import createMocksAction from "./createMocksAction.js";
+import createServiceWorkerAction from "./createServiceWorkerAction.js";
 
 const { name, description, version } = getPackageInfo();
 
-export function buildCLI({ createAction = createMocksAction } = {}) {
+export function buildCLI(
+  { createAction = createServiceWorkerAction, config: customConfig } = {
+    createAction: createServiceWorkerAction,
+    config: {},
+  }
+) {
   return new Command()
     .name(name)
     .description(description)
@@ -14,6 +19,6 @@ export function buildCLI({ createAction = createMocksAction } = {}) {
       "path to the configuration file",
       "mockme.config.js"
     )
-    .action(createAction)
+    .action(createAction(customConfig))
     .showHelpAfterError();
 }

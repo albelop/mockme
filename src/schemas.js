@@ -20,12 +20,9 @@ const MockRequestSchema = z.object({
   conditions: z
     .object({
       url: jsonSchema.optional(),
-      queryParam: jsonSchema.optional(),
       query: jsonSchema.optional(),
-      param: jsonSchema.optional(),
       header: jsonSchema.optional(),
       cookie: jsonSchema.optional(),
-      store: jsonSchema.optional(),
       body: jsonSchema.optional(),
     })
     .optional(),

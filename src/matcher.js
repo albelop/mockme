@@ -82,15 +82,19 @@ export default class Matcher {
   #findMock({
     method,
     path,
-    headers = {},
+    header = {},
     cookie = "",
     body = {},
-    queryParams = {},
     query = {},
-    params = {},
     scenario = this.#scenario,
   }) {
     const _cookie = cookieParser.parse(cookie);
+    const requestOptions = {
+      header,
+      cookie: _cookie,
+      body,
+      query,
+    };
     const mocks = this.#mocks.filter(
       ({ request }) =>
         request.path(path) &&
@@ -98,12 +102,7 @@ export default class Matcher {
         // @ts-ignore
         matchConditions(
           {
-            headers,
-            cookie: _cookie,
-            body,
-            queryParams,
-            query,
-            params,
+            ...requestOptions,
             url: request.path(path).params,
           },
           request
@@ -116,29 +115,25 @@ export default class Matcher {
     const mock = !scenario ? noScenarioMock : inScenarioMock || noScenarioMock;
 
     if (mock) {
-      const { response, delay, request } = mock;
+      const { response, delay: mockDelay, request } = mock;
       let _response;
 
       if (typeof response === "function") {
-        const { params } = mock.request.path(path);
-        const responseOptions = { params };
-        if (request.body) {
-          responseOptions.body = request.body;
-        }
-        if (request.conditions?.header) {
-          responseOptions.headers = request.conditions.header;
-        }
-
-        if (request.conditions?.cookie) {
-          responseOptions.cookies = request.conditions.cookie;
-        }
-
-        _response = response(responseOptions);
+        const responseOptions = {
+          ...requestOptions,
+          url: request.path(path).params,
+        };
+        _response = response(filterEmptyOptions(responseOptions));
       } else {
         _response = response;
       }
 
-      const { body = {}, status = 200, headers = {} } = _response;
+      const {
+        body = {},
+        status = 200,
+        headers = {},
+        delay: responseDelay,
+      } = _response;
 
       // @ts-ignore
       const result = Response.json(body, {
@@ -146,7 +141,7 @@ export default class Matcher {
         headers: new Headers(headers),
       });
 
-      return { result, delay };
+      return { result, delay: responseDelay || mockDelay };
     } else {
       return { result: Response.error() };
     }
@@ -163,20 +158,15 @@ export default class Matcher {
   }
 }
 
-function matchConditions(
-  { headers, cookie, body, query, queryParams, params, url },
-  request
-) {
+function matchConditions({ header, cookie, body, query, url }, request) {
   return (
     (request.conditions?.url
       ? compareObjects(url, request.conditions?.url)
       : true) &&
-    compareObjects(headers, request.conditions?.header) &&
+    compareObjects(header, request.conditions?.header) &&
     compareObjects(cookie, request.conditions?.cookie) &&
     compareObjects(body, request.conditions?.body) &&
-    compareObjects(query, request.conditions?.query) &&
-    compareObjects(queryParams, request.conditions?.queryParam) &&
-    compareObjects(params, request.conditions?.param)
+    compareObjects(query, request.conditions?.query)
   );
 }
 
@@ -197,18 +187,43 @@ function compareObjects(a, b = {}) {
 function parseRequest(request = {}) {
   if (request instanceof Request) {
     const path = new URL(request.url).pathname;
-    // @ts-ignore
-    const queryParams = new URLSearchParams(request.url.search);
-    return {
+
+    const requestOptions = {
       path,
       method: request.method,
-      queryParams: Object.fromEntries(queryParams.entries()),
-      // headers: Object.fromEntries(request.headers.entries()),
     };
+
+    const query = Object.fromEntries(
+      // @ts-ignore
+      new URLSearchParams(request.url.search)?.entries()
+    );
+
+    if (Object.keys(query).length) requestOptions.query = query;
+
+    return requestOptions;
   } else {
     return request;
   }
 }
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+function filterEmptyOptions(obj = {}) {
+  return Object.keys(obj).reduce((result, key) => {
+    if (Array.isArray(obj[key]) && obj[key].length !== 0) {
+      result[key] = obj[key];
+    } else if (
+      typeof obj[key] === "object" &&
+      Object.keys(obj[key]).length !== 0
+    ) {
+      result[key] = obj[key];
+    } else if (
+      typeof obj[key] !== "object" &&
+      (Boolean(obj[key]) || obj[key] === 0 || obj[key] === false)
+    ) {
+      result[key] = obj[key];
+    }
+
+    return result;
+  }, {});
 }

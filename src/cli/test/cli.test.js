@@ -49,11 +49,11 @@ describe("CLI Commands", () => {
     expect(result.stdout).toBe(`${packageInfo.version}`);
   });
 
-  it("should call create action with config file set to mockme.config.js", async () => {
+  it("should call create action with config file set to mockme.config.mjs", async () => {
     const createAction = vi.fn();
     await cli([], { createAction: () => createAction });
     expect(createAction.mock.lastCall).toContainEqual({
-      config: "mockme.config.js",
+      config: "mockme.config.mjs",
     });
   });
 
@@ -69,15 +69,13 @@ describe("CLI Commands", () => {
   it("should output config file not found", async () => {
     const result = await cli();
 
-    expect(result.error).toBe(
-      "Failed to load url mockme.config.js (resolved id: mockme.config.js). Does the file exist?"
-    );
+    expect(result.error).toContain("Could not find config file at");
   });
 });
 
 describe("Plugins", () => {
   it("should not create the service worker if there are no plugins", async () => {
-    const result = await cli(["-c", "src/cli/test/mockme.config.js"]);
+    const result = await cli(["-c", "src/cli/test/mockme.config.mjs"]);
 
     expect(result.error).toBe(
       "Nothing to be processed. The output was not generated."
@@ -103,7 +101,7 @@ describe("Plugins", () => {
       name: "mockme-plugin-test",
       handler: pluginHandler,
     });
-    const result = await cli([], {
+    const result = await cli(["-c", "src/cli/test/mockme.config.mjs"], {
       config: {
         output: "src/cli/test/.storybook/service-worker.plugins.js",
         plugins: [plugin()],
@@ -125,7 +123,7 @@ describe("Plugins", () => {
       handler: pluginBHandler,
     });
 
-    await cli([], {
+    await cli(["-c", "src/cli/test/mockme.config.mjs"], {
       config: {
         output: "src/cli/test/.storybook/service-worker.plugins.js",
         plugins: [pluginA(), pluginB()],
@@ -137,7 +135,7 @@ describe("Plugins", () => {
   });
 
   it("should have plugin config available in the plugin handler", async () => {
-    const logSpy = vi.spyOn(console, 'log')
+    const logSpy = vi.spyOn(console, "log");
     const plugin = (config) => ({
       name: "mockme-plugin-test",
       handler: () => {
@@ -145,13 +143,13 @@ describe("Plugins", () => {
       },
     });
 
-    const result = await cli([], {
+    const result = await cli(["-c", "src/cli/test/mockme.config.mjs"], {
       config: {
         output: "src/cli/test/.storybook/service-worker.plugins.js",
         plugins: [plugin({ test: "test-config" })],
       },
     });
 
-    expect(logSpy).toHaveBeenCalledWith("test-config")
+    expect(logSpy).toHaveBeenCalledWith("test-config");
   });
 });

@@ -32,7 +32,7 @@ $ pnpm add -D @betheweb/mockme
 
 ## Configuration
 
-The config file `mockme.config.js` should be placed in the root of your project. Here is an example:
+The config file `mockme.config.mjs` should be placed in the root of your project. Here is an example:
 
 ```js
 import mockmeJsPlugin from "@betheweb/mockme-js-plugin";
@@ -54,6 +54,7 @@ A plugin should be distributed as a package that exports a function that can be 
 
 ### Conventions
 
+- Plugins should have type module.
 - Plugins should have a clear name with mockme-plugin- prefix.
 - Include mockme-plugin keyword in package.json.
 - Plugins should be tested. We recommend mocha or vitest.

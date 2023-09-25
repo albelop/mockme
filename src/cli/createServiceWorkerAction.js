@@ -6,11 +6,19 @@ import { mockSchema } from "../schemas.js";
 
 export default function createServiceWorkerAction(customConfig) {
   return async function ({ config: configFileName }, command) {
+    let fileConfig = {};
     try {
       // 1. Read config from file or use custom config.
-      const { plugins, output } =
-        customConfig || (await import(configFileName))?.default;
+      fileConfig = (await import(join(process.cwd(), configFileName)))?.default;
+    } catch (error) {
+      throw Error(
+        `Could not find config file at ${join(process.cwd(), configFileName)}`
+      );
+    }
+    // @ts-ignore
+    const { plugins, output } = { ...fileConfig, ...customConfig };
 
+    try {
       // 2. Check there are plugins to start the process.
       if (!plugins?.length) {
         throw Error("Nothing to be processed. The output was not generated.");
@@ -87,7 +95,7 @@ function generateMocksString(mocks = []) {
 }
 
 function generateServiceWorkerContent(string, replacements) {
-  const content = `import { sw } from "mockme";
+  const content = `import { sw } from "@betheweb/mockme";
   sw(self, [replaceMe]);`;
   const stringWithReplacements = Object.keys(replacements).reduce(
     (result, key) => {
@@ -103,15 +111,19 @@ async function buildContent(contents) {
   const esbuildOptions = {
     stdin: {
       contents,
+      loader: "ts",
+      resolveDir: ".",
     },
     bundle: true,
     write: false,
     format: "esm",
   };
 
+  console.log(process.cwd());
+
   if (process.env.MOCKME_TEST) {
     esbuildOptions.alias = {
-      mockme: "./src/index.js",
+      "@betheweb/mockme": "./src/index.js",
     };
   }
   // @ts-ignore

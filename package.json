@@ -12,6 +12,7 @@
     ".": "./src/index.js"
   },
   "scripts": {
+    "publish": "changeset publish",
     "test": "vitest --coverage",
     "test:ui": "vitest --ui --coverage"
   },

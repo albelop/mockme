@@ -47,6 +47,19 @@ export default {
 };
 ```
 
+If you need to have the different scenarios in your demo, you can generate an scenarios file that will have a default export with a list of strings for each one. To generate it include it in your config:
+
+```js
+import mockmeJsPlugin from "@betheweb/mockme-js-plugin";
+
+export default {
+  output: "demo/service-worker.js",
+  scenarios: {
+    output: "demo/scenarios.js",
+  },
+};
+```
+
 ## Plugings
 
 A mockme plugin is an object with name property, and a handler function to generate the output as described below, and which follows our conventions.

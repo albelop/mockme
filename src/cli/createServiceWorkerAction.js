@@ -8,7 +8,7 @@ export default function createServiceWorkerAction(customConfig) {
   return async function ({ config: configFileName }, command) {
     let fileConfig = {};
     try {
-      // 1. Read config from file or use custom config.
+      // Read config from file or use custom config.
       fileConfig = (await import(join(process.cwd(), configFileName)))?.default;
     } catch (error) {
       throw Error(
@@ -16,34 +16,38 @@ export default function createServiceWorkerAction(customConfig) {
       );
     }
     // @ts-ignore
-    const { plugins, output } = { ...fileConfig, ...customConfig };
+    const { plugins, output, scenarios } = { ...fileConfig, ...customConfig };
 
     try {
-      // 2. Check there are plugins to start the process.
+      // Check there are plugins to start the process.
       if (!plugins?.length) {
         throw Error("Nothing to be processed. The output was not generated.");
       }
 
-      // 3. Collect mocks from the plugins execution.
+      // Collect mocks from the plugins execution.
       const pluginsMocks = await getMocksFromPlugins(plugins);
 
-      // 4. Filter mocks with only those with a valid mock schema.
+      // Filter mocks with only those with a valid mock schema.
       const mocks = filterMocksWithValidSchema(pluginsMocks, mockSchema);
 
-      // 5. Cast the mocks structure into a string creating a map for functions.
+      // Extract scenario content to include in the scenarios file.
+      const scenariosContent = generateScenariosString(mocks);
+
+      // Cast the mocks structure into a string creating a map for functions.
       const { mocksString, functionReplacements } = generateMocksString(mocks);
 
-      // 6. Create the js content for the mock service.
+      // Create the js content for the mock service.
       const serviceWorkerJSContent = generateServiceWorkerContent(
         mocksString,
         functionReplacements
       );
 
-      // 7. Build the content using esbuild.
+      // Build the content using esbuild.
       const fileContent = await buildContent(serviceWorkerJSContent);
 
-      // 8. Output the content to the destination file.
+      // Output the content to the destination file.
       await writeServiceWorkerFile(output, fileContent);
+      await writeScenariosFile(scenarios.output, scenariosContent);
     } catch (error) {
       command.error(error.message);
     }
@@ -94,6 +98,15 @@ function generateMocksString(mocks = []) {
   return { mocksString, functionReplacements };
 }
 
+function generateScenariosString(mocks = []) {
+  const scenarios = [...mocks.values()].reduce((result, { scenario }) => {
+    if (Boolean(scenario)) result.push(scenario);
+    return result;
+  }, []);
+
+  return `export default ${JSON.stringify(scenarios)};`;
+}
+
 function generateServiceWorkerContent(string, replacements) {
   const content = `import { sw } from "@betheweb/mockme";
   sw(self, [replaceMe]);`;
@@ -134,4 +147,11 @@ async function buildContent(contents) {
 async function writeServiceWorkerFile(output, content) {
   await mkdir(dirname(output), { recursive: true });
   await writeFile(join(process.cwd(), output), content, "utf-8");
+}
+
+async function writeScenariosFile(output, content) {
+  if (!output) return;
+  const dir = dirname(output);
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(process.cwd(), dir, "scenarios.js"), content, "utf-8");
 }

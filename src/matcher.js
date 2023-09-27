@@ -1,6 +1,6 @@
 import { match } from "path-to-regexp";
 import { mockSchema } from "./schemas.js";
-import cookieParser from "cookie";
+import { httpCookie } from "cookie-muncher";
 
 export default class Matcher {
   #mocks = [];
@@ -89,10 +89,9 @@ export default class Matcher {
     scenario = this.#scenario,
     request = {},
   }) {
-    const _cookie = cookieParser.parse(cookie);
     const requestOptions = {
       header,
-      cookie: _cookie,
+      cookie: cookieParse(cookie),
       body,
       query,
     };
@@ -167,7 +166,7 @@ function matchConditions({ header, cookie, body, query, url }, request) {
     (request.conditions?.url
       ? compareObjects(url, request.conditions?.url)
       : true) &&
-    compareObjects(header, request.conditions?.header) &&
+    containedObjects(header, request.conditions?.header) &&
     compareObjects(cookie, request.conditions?.cookie) &&
     compareObjects(body, request.conditions?.body) &&
     compareObjects(query, request.conditions?.query)
@@ -188,6 +187,36 @@ function compareObjects(a, b = {}) {
 
   return isEqual;
 }
+
+function containedObjects(a, b = {}) {
+  const aKeys = Object.keys(a).map((str) => str.toLowerCase());
+  const bKeys = Object.keys(b).map((str) => str.toLowerCase());
+
+  // Match bKeys are included in aKeys
+  const bKeysIncluded =
+    bKeys.filter((bKey) => aKeys.includes(bKey)).length === bKeys.length;
+
+  if (!bKeysIncluded) return false;
+
+  // Match values
+  if (bKeysIncluded) {
+    const bKeysLowered = Object.keys(b).reduce((result, key) => {
+      result[key.toLowerCase()] = b[key];
+      return result;
+    }, {});
+    const aFiltered = Object.keys(a).reduce((result, key) => {
+      if (
+        bKeys.includes(key.toLowerCase()) &&
+        a[key].toString() === bKeysLowered[key.toLowerCase()].toString()
+      ) {
+        result[key.toLowerCase()] = a[key].toString();
+      }
+      return result;
+    }, {});
+    return compareObjects(aFiltered, bKeysLowered);
+  }
+}
+
 async function parseRequest(request = {}) {
   if (request instanceof Request) {
     const path = new URL(request.url).pathname;
@@ -197,12 +226,16 @@ async function parseRequest(request = {}) {
       method: request.method,
     };
 
-    const query = Object.fromEntries(
+    requestOptions.query = Object.fromEntries(
       // @ts-ignore
       new URLSearchParams(request.url.search)?.entries()
     );
 
-    if (Object.keys(query).length) requestOptions.query = query;
+    const headers = Object.fromEntries(request.headers.entries());
+    requestOptions.header = Object.keys(headers).reduce((result, headerKey) => {
+      result[headerKey.toLowerCase()] = headers[headerKey];
+      return result;
+    }, {});
 
     // request body and header
     const originalRequest = {};
@@ -238,6 +271,13 @@ function filterEmptyOptions(obj = {}) {
       result[key] = obj[key];
     }
 
+    return result;
+  }, {});
+}
+
+function cookieParse(str = "") {
+  return httpCookie.parse(str).reduce((result, { name, value }) => {
+    result[name] = value;
     return result;
   }, {});
 }

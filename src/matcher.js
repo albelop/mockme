@@ -64,8 +64,8 @@ export default class Matcher {
     return [parsedMocks, [...scenarios], [...paths]];
   }
 
-  match(request = {}) {
-    const options = parseRequest(request);
+  async match(request = {}) {
+    const options = await parseRequest(request);
     // @ts-ignore
     const { result, delay } = this.#findMock(options);
 
@@ -87,6 +87,7 @@ export default class Matcher {
     body = {},
     query = {},
     scenario = this.#scenario,
+    request = {},
   }) {
     const _cookie = cookieParser.parse(cookie);
     const requestOptions = {
@@ -115,14 +116,17 @@ export default class Matcher {
     const mock = !scenario ? noScenarioMock : inScenarioMock || noScenarioMock;
 
     if (mock) {
-      const { response, delay: mockDelay, request } = mock;
+      const { response, delay: mockDelay } = mock;
       let _response;
 
       if (typeof response === "function") {
         const responseOptions = {
           ...requestOptions,
-          url: request.path(path).params,
+          url: mock.request.path(path).params,
+          body: request.body || {},
+          header: request.header || {},
         };
+
         _response = response(filterEmptyOptions(responseOptions));
       } else {
         _response = response;
@@ -184,7 +188,7 @@ function compareObjects(a, b = {}) {
 
   return isEqual;
 }
-function parseRequest(request = {}) {
+async function parseRequest(request = {}) {
   if (request instanceof Request) {
     const path = new URL(request.url).pathname;
 
@@ -200,7 +204,17 @@ function parseRequest(request = {}) {
 
     if (Object.keys(query).length) requestOptions.query = query;
 
-    return requestOptions;
+    // request body and header
+    const originalRequest = {};
+    try {
+      originalRequest.body = await request.json();
+    } catch {
+      // do nothin
+    } finally {
+      originalRequest.header = Object.fromEntries(request.headers);
+    }
+
+    return { ...requestOptions, request: originalRequest };
   } else {
     return request;
   }

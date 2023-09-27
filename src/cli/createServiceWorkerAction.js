@@ -119,8 +119,6 @@ async function buildContent(contents) {
     format: "esm",
   };
 
-  console.log(process.cwd());
-
   if (process.env.MOCKME_TEST) {
     esbuildOptions.alias = {
       "@betheweb/mockme": "./src/index.js",

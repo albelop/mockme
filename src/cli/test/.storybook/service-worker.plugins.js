@@ -4284,8 +4284,8 @@ var Matcher = class {
     });
     return [parsedMocks, [...scenarios], [...paths]];
   }
-  match(request = {}) {
-    const options = parseRequest(request);
+  async match(request = {}) {
+    const options = await parseRequest(request);
     const { result, delay } = this.#findMock(options);
     return {
       response: result,
@@ -4304,7 +4304,8 @@ var Matcher = class {
     cookie = "",
     body = {},
     query = {},
-    scenario = this.#scenario
+    scenario = this.#scenario,
+    request = {}
   }) {
     const _cookie = import_cookie.default.parse(cookie);
     const requestOptions = {
@@ -4314,25 +4315,27 @@ var Matcher = class {
       query
     };
     const mocks = this.#mocks.filter(
-      ({ request }) => request.path(path) && request.method === method.toUpperCase() && // @ts-ignore
+      ({ request: request2 }) => request2.path(path) && request2.method === method.toUpperCase() && // @ts-ignore
       matchConditions(
         {
           ...requestOptions,
-          url: request.path(path).params
+          url: request2.path(path).params
         },
-        request
+        request2
       )
     );
     const noScenarioMock = mocks.find((m) => !m.scenario);
     const inScenarioMock = mocks.find((m) => m.scenario === scenario);
     const mock = !scenario ? noScenarioMock : inScenarioMock || noScenarioMock;
     if (mock) {
-      const { response, delay: mockDelay, request } = mock;
+      const { response, delay: mockDelay } = mock;
       let _response;
       if (typeof response === "function") {
         const responseOptions = {
           ...requestOptions,
-          url: request.path(path).params
+          url: mock.request.path(path).params,
+          body: request.body || {},
+          header: request.header || {}
         };
         _response = response(filterEmptyOptions(responseOptions));
       } else {
@@ -4379,7 +4382,7 @@ function compareObjects(a, b = {}) {
   }
   return isEqual;
 }
-function parseRequest(request = {}) {
+async function parseRequest(request = {}) {
   if (request instanceof Request) {
     const path = new URL(request.url).pathname;
     const requestOptions = {
@@ -4392,7 +4395,14 @@ function parseRequest(request = {}) {
     );
     if (Object.keys(query).length)
       requestOptions.query = query;
-    return requestOptions;
+    const originalRequest = {};
+    try {
+      originalRequest.body = await request.json();
+    } catch {
+    } finally {
+      originalRequest.header = Object.fromEntries(request.headers);
+    }
+    return { ...requestOptions, request: originalRequest };
   } else {
     return request;
   }

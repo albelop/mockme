@@ -81,7 +81,7 @@ describe("Matcher", () => {
   });
 
   describe("match", () => {
-    it("should return an error response if no match", () => {
+    it("should return an error response if no match", async () => {
       const matcher = new Matcher([
         {
           request: { method: "GET", path: "/" },
@@ -89,24 +89,27 @@ describe("Matcher", () => {
         },
       ]);
 
-      expect(
-        matcher.match({ method: "POST", path: "/abc" }).response
-      ).toHaveProperty("status", 0);
+      const { response } = await matcher.match({
+        method: "POST",
+        path: "/abc",
+      });
+      expect(response).toHaveProperty("status", 0);
     });
 
-    it("should match a mock by method and path", () => {
+    it("should match a mock by method and path", async () => {
       const matcher = new Matcher([
         {
           request: { method: "GET", path: "/" },
           response: { status: 200, body: {} },
         },
       ]);
-      expect(
-        matcher.match({ method: "GET", path: "/" }).response
-      ).toBeInstanceOf(Response);
+
+      const { response } = await matcher.match({ method: "GET", path: "/" });
+
+      expect(response).toBeInstanceOf(Response);
     });
 
-    it("should match a mock by method, path and header", () => {
+    it("should match a mock by method, path and header", async () => {
       const matcher = new Matcher([
         {
           request: {
@@ -118,7 +121,7 @@ describe("Matcher", () => {
         },
       ]);
 
-      const { response } = matcher.match({
+      const { response } = await matcher.match({
         method: "GET",
         path: "/",
         header: { a: "1" },
@@ -127,7 +130,7 @@ describe("Matcher", () => {
       expect(response).toHaveProperty("status", 200);
     });
 
-    it("should match a mock by method, path, header and url", () => {
+    it("should match a mock by method, path, header and url", async () => {
       const matcher = new Matcher([
         {
           request: {
@@ -139,7 +142,7 @@ describe("Matcher", () => {
         },
       ]);
 
-      const { response } = matcher.match({
+      const { response } = await matcher.match({
         method: "GET",
         path: "/1",
         header: { a: "1" },
@@ -148,7 +151,7 @@ describe("Matcher", () => {
       expect(response).toHaveProperty("status", 200);
     });
 
-    it("should match a mock by method, path and cookie", () => {
+    it("should match a mock by method, path and cookie", async () => {
       const matcher = new Matcher([
         {
           request: {
@@ -160,7 +163,7 @@ describe("Matcher", () => {
         },
       ]);
 
-      const { response } = matcher.match({
+      const { response } = await matcher.match({
         method: "GET",
         path: "/",
         cookie: "a=1",
@@ -169,7 +172,7 @@ describe("Matcher", () => {
       expect(response).toHaveProperty("status", 200);
     });
 
-    it("should match a mock by method, path, headers, cookie, url, query, queryParam, param and body", () => {
+    it("should match a mock by method, path, headers, cookie, url, query, queryParam, param and body", async () => {
       const matcher = new Matcher([
         {
           request: {
@@ -187,7 +190,7 @@ describe("Matcher", () => {
         },
       ]);
 
-      const { response } = matcher.match({
+      const { response } = await matcher.match({
         method: "GET",
         path: "/1",
         header: { a: "1" },
@@ -226,7 +229,7 @@ describe("Matcher", () => {
 
       matcher.scenario = "b";
 
-      const { response } = matcher.match({
+      const { response } = await matcher.match({
         method: "GET",
         path: "/test",
       });
@@ -259,7 +262,7 @@ describe("Matcher", () => {
         },
       ]);
 
-      const { response } = matcher.match({
+      const { response } = await matcher.match({
         method: "GET",
         path: "/test",
       });
@@ -281,7 +284,7 @@ describe("Matcher", () => {
         },
       ]);
 
-      const { delayedResponse } = matcher.match({
+      const { delayedResponse } = await matcher.match({
         method: "GET",
         path: "/test",
       });
@@ -326,14 +329,16 @@ describe("Matcher", () => {
         },
       ]);
 
-      const { response } = matcher.match(new Request("http:/test.com/test"));
+      const { response } = await matcher.match(
+        new Request("http:/test.com/test")
+      );
       const result = await response.json();
       expect(result).toEqual(body);
     });
   });
 
   describe("response", () => {
-    it("should call response fn with request path params", () => {
+    it("should call response fn with request path params", async () => {
       const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
       const matcher = new Matcher([
         {
@@ -343,8 +348,58 @@ describe("Matcher", () => {
         },
       ]);
 
-      matcher.match({ method: "GET", path: "/1" });
+      await matcher.match({ method: "GET", path: "/1" });
       expect(responseFn).toHaveBeenCalledWith({ url: { id: "1" } });
+    });
+
+    it("should call response fn with request body", async () => {
+      const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
+      const matcher = new Matcher([
+        {
+          request: { method: "PUT", path: "/:id" },
+          response: responseFn,
+        },
+      ]);
+      const requestBody = { b: "1" };
+      const request = new Request("http://localhost/1", {
+        body: JSON.stringify(requestBody),
+        method: "PUT",
+      });
+
+      await matcher.match(request);
+      expect(responseFn).toHaveBeenCalledWith({
+        body: requestBody,
+        url: { id: "1" },
+        header: { "content-type": "text/plain;charset=UTF-8" },
+      });
+    });
+
+    it("should call response fn with request body", async () => {
+      const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
+      const matcher = new Matcher([
+        {
+          request: { method: "PUT", path: "/:id" },
+          response: responseFn,
+        },
+      ]);
+      const requestBody = { b: "1" };
+      const requestHeaders = new Headers();
+      requestHeaders.append("h", "3");
+      const request = new Request("http://localhost/1", {
+        body: JSON.stringify(requestBody),
+        method: "PUT",
+        headers: requestHeaders,
+      });
+
+      await matcher.match(request);
+      expect(responseFn).toHaveBeenCalledWith({
+        body: requestBody,
+        url: { id: "1" },
+        header: {
+          ...Object.fromEntries(requestHeaders),
+          "content-type": "text/plain;charset=UTF-8",
+        },
+      });
     });
   });
 });

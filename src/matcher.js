@@ -122,7 +122,9 @@ export default class Matcher {
         const responseOptions = {
           ...requestOptions,
           url: mock.request.path(path).params,
+          // @ts-ignore
           body: request.body || {},
+          // @ts-ignore
           header: request.header || {},
         };
 
@@ -150,6 +152,7 @@ export default class Matcher {
     }
   }
 
+  // @ts-ignore
   set scenario(scenario) {
     if (this.#scenarios.includes(scenario) || scenario === undefined) {
       this.#scenario = scenario;

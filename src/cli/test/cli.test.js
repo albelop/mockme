@@ -85,7 +85,7 @@ describe("Plugins", () => {
   it("should not error if there is one plugin at least", async () => {
     const result = await cli([], {
       config: {
-        output: "src/cli/test/.storybook/service-worker.plugins.js",
+        output: "src/cli/test/outputs/.storybook/service-worker.plugins.js",
         plugins: [() => ({ name: "mockme-plugin-test", handler: () => {} })],
       },
     });
@@ -103,7 +103,7 @@ describe("Plugins", () => {
     });
     const result = await cli(["-c", "src/cli/test/mockme.config.mjs"], {
       config: {
-        output: "src/cli/test/.storybook/service-worker.plugins.js",
+        output: "src/cli/test/outputs/.storybook/service-worker.plugins.js",
         plugins: [plugin()],
       },
     });
@@ -125,7 +125,7 @@ describe("Plugins", () => {
 
     await cli(["-c", "src/cli/test/mockme.config.mjs"], {
       config: {
-        output: "src/cli/test/.storybook/service-worker.plugins.js",
+        output: "src/cli/test/outputs/.storybook/service-worker.plugins.js",
         plugins: [pluginA(), pluginB()],
       },
     });
@@ -145,7 +145,7 @@ describe("Plugins", () => {
 
     const result = await cli(["-c", "src/cli/test/mockme.config.mjs"], {
       config: {
-        output: "src/cli/test/.storybook/service-worker.plugins.js",
+        output: "src/cli/test/outputs/.storybook/service-worker.plugins.js",
         plugins: [plugin({ test: "test-config" })],
       },
     });

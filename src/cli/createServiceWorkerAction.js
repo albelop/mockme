@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import * as esbuild from "esbuild";
 
 import { mockSchema } from "../schemas.js";
+import { useLogger } from "../logger.js";
 
 export default function createServiceWorkerAction(customConfig) {
   return async function ({ config: configFileName }, command) {
@@ -16,7 +17,10 @@ export default function createServiceWorkerAction(customConfig) {
       );
     }
     // @ts-ignore
-    const { plugins, output, scenarios } = { ...fileConfig, ...customConfig };
+    const { plugins, output, scenarios, logDir } = {
+      ...fileConfig,
+      ...customConfig,
+    };
 
     try {
       // Check there are plugins to start the process.
@@ -24,8 +28,11 @@ export default function createServiceWorkerAction(customConfig) {
         throw Error("Nothing to be processed. The output was not generated.");
       }
 
+      // Create the logger
+      const logger = useLogger(logDir);
+
       // Collect mocks from the plugins execution.
-      const pluginsMocks = await getMocksFromPlugins(plugins);
+      const pluginsMocks = await getMocksFromPlugins(plugins, logger);
 
       // Filter mocks with only those with a valid mock schema.
       const mocks = filterMocksWithValidSchema(pluginsMocks, mockSchema);
@@ -66,9 +73,11 @@ function mockKey(mock) {
     .toLowerCase();
 }
 
-async function getMocksFromPlugins(plugins = []) {
+async function getMocksFromPlugins(plugins = [], logger) {
   return Promise.all(
-    plugins.map(({ handler }) => Promise.resolve().then(() => handler?.()))
+    plugins.map(({ handler }) =>
+      Promise.resolve().then(() => handler?.({ logger }))
+    )
   );
 }
 

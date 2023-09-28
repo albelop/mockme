@@ -1,11 +1,11 @@
+import ConsoleLogger from "./loggers/ConsoleLogger.js";
 import FileLogger from "./loggers/FileLogger.js";
 
-export function useLogger(outdir, Logger = FileLogger) {
-  // @ts-ignore
+// @ts-ignore
+export function useLogger({ outdir, prefix } = {}, Logger = FileLogger) {
   if (outdir) {
-    // @ts-ignore
-    return new Logger(outdir);
+    return new Logger(outdir, prefix);
   } else {
-    return console;
+    return new ConsoleLogger(prefix);
   }
 }

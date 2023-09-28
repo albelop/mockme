@@ -29,7 +29,7 @@ export default function createServiceWorkerAction(customConfig) {
       }
 
       // Create the logger
-      const logger = useLogger(logDir);
+      const logger = (prefix) => useLogger(logDir, prefix);
 
       // Collect mocks from the plugins execution.
       const pluginsMocks = await getMocksFromPlugins(plugins, logger);
@@ -75,9 +75,9 @@ function mockKey(mock) {
 
 async function getMocksFromPlugins(plugins = [], logger) {
   return Promise.all(
-    plugins.map(({ handler }) =>
-      Promise.resolve().then(() => handler?.({ logger }))
-    )
+    plugins.map(({ name, handler }) => {
+      Promise.resolve().then(() => handler?.({ logger: logger(name) }));
+    })
   );
 }
 

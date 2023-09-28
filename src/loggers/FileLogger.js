@@ -12,34 +12,37 @@ function getLogFileName() {
 
 export default class FileLogger {
   #outdir;
+  #prefix;
   #writeFn;
 
   constructor(
     outdir = join(os.homedir(), ".mockme"),
+    prefix,
     writeFn = appendFileSync
   ) {
     this.#outdir = outdir;
+    this.#prefix = prefix;
     this.#writeFn = writeFn;
   }
 
+  #buildMessage(message) {
+    return [this.#prefix, message].filter((x) => x).join(" ") + "\n";
+  }
+
   log(message) {
-    this.#write(`[LOG] ${message}`);
+    this.#write(`[LOG] ${this.#buildMessage(message)}`);
   }
   warn(message) {
-    this.#write(`[WARN] ${message}`);
+    this.#write(`[WARN] ${this.#buildMessage(message)}`);
   }
   error(message) {
-    this.#write(`[ERROR] ${message}`);
+    this.#write(`[ERROR] ${this.#buildMessage(message)}`);
   }
 
   async #write(message) {
     try {
       mkdirSync(this.#outdir, { recursive: true });
-      this.#writeFn(
-        join(this.#outdir, getLogFileName()),
-        message + "\n",
-        "utf8"
-      );
+      this.#writeFn(join(this.#outdir, getLogFileName()), message, "utf8");
     } catch (error) {
       console.log(error);
     }

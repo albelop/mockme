@@ -74,17 +74,19 @@ function mockKey(mock) {
 }
 
 async function getMocksFromPlugins(plugins = [], logger) {
-  return Promise.all(
-    plugins.map(({ name, handler }) => {
-      Promise.resolve().then(() => handler?.({ logger: logger(name) }));
-    })
+  const mocks = await Promise.all(
+    plugins.map(({ name, handler }) =>
+      Promise.resolve().then(() => handler?.({ logger: logger(name) }))
+    )
   );
+
+  return mocks.flat();
 }
 
 function filterMocksWithValidSchema(mocks, schema) {
   return mocks
-    .filter((x) => x)
     .flat()
+    .filter((x) => x)
     .map(schema.parse.bind(schema))
     .reduce((result, mock) => {
       result.set(mockKey(mock), mock);

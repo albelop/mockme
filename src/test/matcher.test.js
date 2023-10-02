@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import Matcher from "../matcher";
 
 describe("Matcher", () => {
@@ -31,6 +31,7 @@ describe("Matcher", () => {
         response: { status: 200, body: {} },
       },
     ]);
+
     expect(matcher).toBeInstanceOf(Matcher);
   });
 
@@ -93,6 +94,7 @@ describe("Matcher", () => {
         method: "POST",
         path: "/abc",
       });
+
       expect(response).toHaveProperty("status", 0);
     });
 
@@ -291,6 +293,7 @@ describe("Matcher", () => {
 
       performance.mark("delay-start");
       await delayedResponse();
+
       performance.mark("delay-end");
       const perf = performance.measure("delay", "delay-start", "delay-end");
 
@@ -332,7 +335,9 @@ describe("Matcher", () => {
       const { response } = await matcher.match(
         new Request("http:/test.com/test")
       );
+
       const result = await response.json();
+
       expect(result).toEqual(body);
     });
   });
@@ -349,6 +354,7 @@ describe("Matcher", () => {
       ]);
 
       await matcher.match({ method: "GET", path: "/1" });
+
       expect(responseFn).toHaveBeenCalledWith({ url: { id: "1" } });
     });
 
@@ -367,6 +373,7 @@ describe("Matcher", () => {
       });
 
       await matcher.match(request);
+
       expect(responseFn).toHaveBeenCalledWith({
         body: requestBody,
         url: { id: "1" },
@@ -392,6 +399,7 @@ describe("Matcher", () => {
       });
 
       await matcher.match(request);
+
       expect(responseFn).toHaveBeenCalledWith({
         body: requestBody,
         url: { id: "1" },
@@ -403,3 +411,4 @@ describe("Matcher", () => {
     });
   });
 });
+

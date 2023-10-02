@@ -154,13 +154,13 @@ export default class Matcher {
 
   // @ts-ignore
   set scenario(scenario) {
-    if (this.#scenarios.includes(scenario) || scenario === undefined) {
-      this.#scenario = scenario;
-    } else {
+    if (scenario !== undefined && !this.scenarios.includes(scenario)) {
       throw new Error(
         `Scenario ${scenario} is not a valid one. Valid scenario options are ${this.scenarios.join()}.`
       );
     }
+
+    this.#scenario = scenario;
   }
 }
 
@@ -180,11 +180,17 @@ function compareObjects(a, b = {}) {
   let isEqual = true;
   const aKeys = Object.keys(a);
 
-  if (aKeys.length !== Object.keys(b).length) return false;
+  if (aKeys.length !== Object.keys(b).length) {
+    return false;
+  }
 
   while (isEqual && aKeys.length > 0) {
     const nextKey = aKeys.pop();
-    if (!nextKey) break;
+
+    if (!nextKey) {
+      break;
+    }
+
     isEqual = a[nextKey].toString() === b[nextKey].toString();
   }
 
@@ -199,7 +205,9 @@ function containedObjects(a, b = {}) {
   const bKeysIncluded =
     bKeys.filter((bKey) => aKeys.includes(bKey)).length === bKeys.length;
 
-  if (!bKeysIncluded) return false;
+  if (!bKeysIncluded) {
+    return false;
+  }
 
   // Match values
   if (bKeysIncluded) {
@@ -214,8 +222,10 @@ function containedObjects(a, b = {}) {
       ) {
         result[key.toLowerCase()] = a[key].toString();
       }
+
       return result;
     }, {});
+
     return compareObjects(aFiltered, bKeysLowered);
   }
 }
@@ -237,11 +247,13 @@ async function parseRequest(request = {}) {
     const headers = Object.fromEntries(request.headers.entries());
     requestOptions.header = Object.keys(headers).reduce((result, headerKey) => {
       result[headerKey.toLowerCase()] = headers[headerKey];
+
       return result;
     }, {});
 
     // request body and header
     const originalRequest = {};
+
     try {
       originalRequest.body = await request.json();
     } catch {
@@ -258,6 +270,7 @@ async function parseRequest(request = {}) {
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
 function filterEmptyOptions(obj = {}) {
   return Object.keys(obj).reduce((result, key) => {
     if (Array.isArray(obj[key]) && obj[key].length !== 0) {
@@ -281,6 +294,7 @@ function filterEmptyOptions(obj = {}) {
 function cookieParse(str = "") {
   return httpCookie.parse(str).reduce((result, { name, value }) => {
     result[name] = value;
+
     return result;
   }, {});
 }

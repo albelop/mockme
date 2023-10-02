@@ -1,15 +1,13 @@
 import { Command } from "commander";
-import getPackageInfo from "./utils/getPackageInfo.js";
 import createServiceWorkerAction from "./createServiceWorkerAction.js";
+import getPackageInfo from "./utils/getPackageInfo.js";
 
-const { name, description, version } = getPackageInfo();
+const { description, version } = getPackageInfo();
 
-export function buildCLI(
-  { createAction = createServiceWorkerAction, config: customConfig } = {
-    createAction: createServiceWorkerAction,
-    config: {},
-  }
-) {
+export function buildCLI({
+  createAction = createServiceWorkerAction,
+  config: customConfig = {},
+} = {}) {
   return new Command()
     .name("mockme")
     .description(description)

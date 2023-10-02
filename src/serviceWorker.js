@@ -20,6 +20,7 @@ export default function serviceWorker(sw, mocks) {
 
   sw.addEventListener("fetch", (event) => {
     const path = new URL(event.request.url).pathname;
+
     if (path.indexOf(".") === -1 && path !== "/") {
       event.respondWith(
         matcher.match(event.request).then((match) => match.delayedResponse())

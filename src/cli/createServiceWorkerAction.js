@@ -1,13 +1,14 @@
-import { dirname, join } from "node:path";
-import { mkdir, writeFile } from "node:fs/promises";
 import * as esbuild from "esbuild";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 
-import { mockSchema } from "../schemas.js";
 import { useLogger } from "../logger.js";
+import { mockSchema } from "../schemas.js";
 
 export default function createServiceWorkerAction(customConfig) {
-  return async function ({ config: configFileName }, command) {
+  return async function({ config: configFileName }, command) {
     let fileConfig = {};
+
     try {
       // Read config from file or use custom config.
       fileConfig = (await import(join(process.cwd(), configFileName)))?.default;
@@ -16,6 +17,7 @@ export default function createServiceWorkerAction(customConfig) {
         `Could not find config file at ${join(process.cwd(), configFileName)}`
       );
     }
+
     // @ts-ignore
     const { plugins, output, scenarios, logDir } = {
       ...fileConfig,
@@ -90,6 +92,7 @@ function filterMocksWithValidSchema(mocks, schema) {
     .map(schema.parse.bind(schema))
     .reduce((result, mock) => {
       result.set(mockKey(mock), mock);
+
       return result;
     }, new Map());
 }
@@ -100,9 +103,12 @@ function generateMocksString(mocks = []) {
   const mocksString = JSON.stringify([...mocks.values()], (_, value) => {
     if (typeof value === "function") {
       const fnKey = `Fn_${Object.keys(functionReplacements).length}`;
+
       functionReplacements[fnKey] = value;
+
       return fnKey;
     }
+
     return value;
   });
 
@@ -111,7 +117,10 @@ function generateMocksString(mocks = []) {
 
 function generateScenariosString(mocks = []) {
   const scenarios = [...mocks.values()].reduce((result, { scenario }) => {
-    if (Boolean(scenario)) result.push(scenario);
+    if (Boolean(scenario)) {
+      result.push(scenario);
+    }
+
     return result;
   }, []);
 
@@ -121,10 +130,9 @@ function generateScenariosString(mocks = []) {
 function generateServiceWorkerContent(string, replacements) {
   const content = `import { sw } from "@betheweb/mockme";
   sw(self, [replaceMe]);`;
+
   const stringWithReplacements = Object.keys(replacements).reduce(
-    (result, key) => {
-      return result.replace(`"${key}"`, replacements[key].toString());
-    },
+    (result, key) => result.replace(`"${key}"`, replacements[key].toString()),
     string
   );
 
@@ -161,8 +169,12 @@ async function writeServiceWorkerFile(output, content) {
 }
 
 async function writeScenariosFile(output, content) {
-  if (!output) return;
+  if (!output) {
+    return;
+  }
+
   const dir = dirname(output);
+
   await mkdir(dir, { recursive: true });
   await writeFile(join(process.cwd(), dir, "scenarios.js"), content, "utf-8");
 }

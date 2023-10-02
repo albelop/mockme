@@ -7,6 +7,7 @@ function getLogFileName() {
   const day = today.getDate();
   const month = today.getMonth();
   const year = today.getFullYear();
+
   return `${["log", year, month, day].join("-")}.txt`;
 }
 
@@ -32,9 +33,11 @@ export default class FileLogger {
   log(message) {
     this.#write(`[LOG] ${this.#buildMessage(message)}`);
   }
+
   warn(message) {
     this.#write(`[WARN] ${this.#buildMessage(message)}`);
   }
+
   error(message) {
     this.#write(`[ERROR] ${this.#buildMessage(message)}`);
   }

@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
-import getPackageInfo from "../utils/getPackageInfo.js";
 import { buildCLI } from "../cli.js";
+import getPackageInfo from "../utils/getPackageInfo.js";
 
 async function cli(args = [], options = {}) {
   const response = {
@@ -9,6 +9,7 @@ async function cli(args = [], options = {}) {
     stderr: "",
     error: "",
   };
+
   try {
     // @ts-ignore
     await buildCLI(options)
@@ -25,12 +26,15 @@ async function cli(args = [], options = {}) {
       })
       .exitOverride()
       .parseAsync(args, { from: "user" });
+
     return response;
   } catch (error) {
     response.error = error.message;
+
     return response;
   }
 }
+
 describe("CLI Commands", () => {
   let packageInfo = {};
 
@@ -51,7 +55,9 @@ describe("CLI Commands", () => {
 
   it("should call create action with config file set to mockme.config.mjs", async () => {
     const createAction = vi.fn();
+
     await cli([], { createAction: () => createAction });
+
     expect(createAction.mock.lastCall).toContainEqual({
       config: "mockme.config.mjs",
     });
@@ -60,7 +66,9 @@ describe("CLI Commands", () => {
   it("should call create action with custom config file using -c option", async () => {
     const createAction = vi.fn();
     const configFileName = "test";
+
     await cli(["-c", configFileName], { createAction: () => createAction });
+
     expect(createAction.mock.lastCall).toContainEqual({
       config: configFileName,
     });
@@ -86,7 +94,7 @@ describe("Plugins", () => {
     const result = await cli([], {
       config: {
         output: "src/cli/test/outputs/.storybook/service-worker.plugins.js",
-        plugins: [() => ({ name: "mockme-plugin-test", handler: () => {} })],
+        plugins: [() => ({ name: "mockme-plugin-test", handler: () => { } })],
       },
     });
 
@@ -101,6 +109,7 @@ describe("Plugins", () => {
       name: "mockme-plugin-test",
       handler: pluginHandler,
     });
+
     const result = await cli(["-c", "src/cli/test/mockme.config.mjs"], {
       config: {
         output: "src/cli/test/outputs/.storybook/service-worker.plugins.js",

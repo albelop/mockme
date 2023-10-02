@@ -60,7 +60,7 @@ export default {
 };
 ```
 
-## Plugings
+## Plugins
 
 A mockme plugin is an object with name property, and a handler function to generate the output as described below, and which follows our conventions.
 A plugin should be distributed as a package that exports a function that can be called with plugin-specific options and returns such an object.
@@ -68,10 +68,10 @@ A plugin should be distributed as a package that exports a function that can be 
 ### Conventions
 
 - Plugins should have type module.
-- Plugins should have a clear name with mockme-plugin- prefix.
-- Include mockme-plugin keyword in package.json.
+- Plugins should have a clear name with `mockme-plugin-` prefix.
+- Include `mockme-plugin` keyword in `package.json`.
 - Plugins should be tested. We recommend mocha or vitest.
-- Use asynchronous methods when it is possible, e.g. fs.readFile instead of fs.readFileSync.
+- Use asynchronous methods when it is possible, e.g. `fs.readFile` instead of `fs.readFileSync`.
 - Document your plugin in English.
 
 ### Properties
@@ -80,22 +80,20 @@ A plugin should be distributed as a package that exports a function that can be 
 
 The name of the plugin to be used when logging.
 
-#### handler : `function`
+#### handler : `function(logger?: Logger): Promise<MockSchema[]>|MockSchema[]`
 
 The function which is going to use the config to generate the output.
 
 ```js
 export function plugin(config) {
   return {
-    name: 'mockme-plugin-test'
-    handler: () => {
-      return []; // Returns an array of objects that have a mock schema
-    },
+    name: 'mockme-plugin-test',
+    handler: () =>  [], // Returns an array of objects that have a mock schema
   };
 }
 ```
 
-## Mock Schema
+## Mock Schema
 
 All plugins should return an array of objects that should be validated using the Mock Schema. This is the definition for the schema:
 
@@ -138,7 +136,7 @@ Example:
 {
   request: {
     method: 'GET',
-    path: '/api/v1/books/:id'
+    path: '/api/v1/books/:id',
   }
 }
 ```
@@ -177,8 +175,8 @@ Example:
     method: 'GET',
     path: '/api/v1/books/:id',
     conditions: {
-      url: {
-        id: "1" // This ensures the url is /api/v1/books/1
+      body: {
+        id: "1", // This ensures the url is /api/v1/books/1
       }
     }
   }
@@ -217,7 +215,7 @@ Example:
     method: 'GET',
     path: '/api/v1/books/:id',
     conditions: {
-      headers: {
+      header: {
         "Content-Type": "application/json" // This ensures the request includes a header with name Content-Type and value "application/json"
       }
     }
@@ -237,7 +235,7 @@ Example:
     method: 'GET',
     path: '/api/v1/books?page=1',
     conditions: {
-      url: {
+      query: {
         page: "1" // The url should have a query parameter with name page and value "1"
       }
     }
@@ -288,17 +286,17 @@ Here is a complex example where all conditions are combined:
 To the service worker to match a request and return a mock data for it, the request should be like this:
 
 ```js
-var myHeaders = new Headers();
+const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 myHeaders.append("Authorization", "Bearer abcd");
 myHeaders.append("Cookie", "token=12345");
 
-var raw = JSON.stringify({
+const raw = JSON.stringify({
   role: "admin",
   title: "Harry Potter",
 });
 
-var requestOptions = {
+const requestOptions = {
   method: "GET",
   headers: myHeaders,
   body: raw,
@@ -377,7 +375,7 @@ The headers to include in the response. This is optional.
 
 ### response.status
 
-The status of the response. This is optional and default value is 200.
+The status of the response. This is optional and default value is `200`.
 
 ```js
 {

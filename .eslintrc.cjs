@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ['eslint-config-airbnb-base'],
+  extends: ['eslint-config-airbnb-base', 'eslint-config-prettier'],
   globals: {
     globalThis: false,
   },

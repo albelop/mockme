@@ -45,8 +45,8 @@ function containedObjects(a, b = {}) {
     }, {});
     const aFiltered = Object.keys(a).reduce((result, key) => {
       if (
-        bKeys.includes(key.toLowerCase())
-        && a[key].toString() === bKeysLowered[key.toLowerCase()].toString()
+        bKeys.includes(key.toLowerCase()) &&
+        a[key].toString() === bKeysLowered[key.toLowerCase()].toString()
       ) {
         // eslint-disable-next-line no-param-reassign
         result[key.toLowerCase()] = a[key].toString();
@@ -59,17 +59,13 @@ function containedObjects(a, b = {}) {
   }
 }
 
-function matchConditions({
-  header, cookie, body, query, url,
-}, request) {
+function matchConditions({ header, cookie, body, query, url }, request) {
   return (
-    (request.conditions?.url
-      ? compareObjects(url, request.conditions?.url)
-      : true)
-    && containedObjects(header, request.conditions?.header)
-    && compareObjects(cookie, request.conditions?.cookie)
-    && compareObjects(body, request.conditions?.body)
-    && compareObjects(query, request.conditions?.query)
+    (request.conditions?.url ? compareObjects(url, request.conditions?.url) : true) &&
+    containedObjects(header, request.conditions?.header) &&
+    compareObjects(cookie, request.conditions?.cookie) &&
+    compareObjects(body, request.conditions?.body) &&
+    compareObjects(query, request.conditions?.query)
   );
 }
 
@@ -111,37 +107,39 @@ async function parseRequest(request = {}) {
   return request;
 }
 
-const timeout = ms => new Promise((resolve) => {
-  setTimeout(resolve, ms);
-});
+const timeout = ms =>
+  new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
 
 function filterEmptyOptions(obj = {}) {
   const isNonEmptyArray = value => Array.isArray(value) && value.length !== 0;
   const isNonEmptyObject = value => typeof value === 'object' && Object.keys(value).length !== 0;
-  const isNonEmptyValue = value => typeof value !== 'object'
-    && (Boolean(value) || value === 0 || value === false);
-  const isNonEmpty = value => isNonEmptyArray(value)
-    || isNonEmptyObject(value)
-    || isNonEmptyValue(value);
+  const isNonEmptyValue = value =>
+    typeof value !== 'object' && (Boolean(value) || value === 0 || value === false);
+  const isNonEmpty = value =>
+    isNonEmptyArray(value) || isNonEmptyObject(value) || isNonEmptyValue(value);
 
-  return Object.keys(obj)
-    .reduce((result, key) => {
-      if (isNonEmpty(obj[key])) {
-        return {
-          ...result,
-          [key]: obj[key],
-        };
-      }
+  return Object.keys(obj).reduce((result, key) => {
+    if (isNonEmpty(obj[key])) {
+      return {
+        ...result,
+        [key]: obj[key],
+      };
+    }
 
-      return result;
-    }, {});
+    return result;
+  }, {});
 }
 
 function cookieParse(str = '') {
-  return httpCookie.parse(str).reduce((result, { name, value }) => ({
-    ...result,
-    [name]: value,
-  }), {});
+  return httpCookie.parse(str).reduce(
+    (result, { name, value }) => ({
+      ...result,
+      [name]: value,
+    }),
+    {},
+  );
 }
 
 export class Matcher {
@@ -163,9 +161,7 @@ export class Matcher {
     }
 
     if (!mocksIsAnArray || !validShape) {
-      throw new Error(
-        'Matcher expects an array of objects within a mock shape.',
-      );
+      throw new Error('Matcher expects an array of objects within a mock shape.');
     }
 
     const [parsedMocks, scenarios, paths] = Matcher.#prepareMocks(mocks);
@@ -185,7 +181,7 @@ export class Matcher {
   static #prepareMocks(mocks = []) {
     const scenarios = new Set();
     const paths = new Set();
-    const parsedMocks = mocks.map((mock) => {
+    const parsedMocks = mocks.map(mock => {
       const { method, path } = mock.request;
 
       if (mock.scenario) scenarios.add(mock.scenario);
@@ -238,10 +234,11 @@ export class Matcher {
       query,
     };
     const mocks = this.#mocks.filter(
-      ({ request: mockRequest }) => mockRequest.path(path)
-        && mockRequest.method === method.toUpperCase()
+      ({ request: mockRequest }) =>
+        mockRequest.path(path) &&
+        mockRequest.method === method.toUpperCase() &&
         // @ts-ignore
-        && matchConditions(
+        matchConditions(
           {
             ...requestOptions,
             url: mockRequest.path(path).params,

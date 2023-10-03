@@ -126,22 +126,18 @@ async function writeScenariosFile(output, content) {
  * @param {string} configFileName
  * @returns {Promise<*>}
  */
-const getConfig = async (configFileName) => {
+const getConfig = async configFileName => {
   try {
     return (await import(join(process.cwd(), configFileName)))?.default;
   } catch (error) {
-    throw Error(
-      `Could not find config file at ${join(process.cwd(), configFileName)}`,
-    );
+    throw Error(`Could not find config file at ${join(process.cwd(), configFileName)}`);
   }
 };
 
 export default function createServiceWorkerAction(customConfig) {
   return async ({ config: configFileName }, command) => {
     const fileConfig = await getConfig(configFileName);
-    const {
-      plugins, output, scenarios, logDir,
-    } = {
+    const { plugins, output, scenarios, logDir } = {
       ...fileConfig,
       ...customConfig,
     };
@@ -153,16 +149,17 @@ export default function createServiceWorkerAction(customConfig) {
       }
 
       // Create the logger
-      const logger = prefix => LoggerFactory.get(
-        {
-          prefix,
-        },
-        {
-          console: ConsoleFactory.get({
-            outputDirectory: logDir,
-          }),
-        },
-      );
+      const logger = prefix =>
+        LoggerFactory.get(
+          {
+            prefix,
+          },
+          {
+            console: ConsoleFactory.get({
+              outputDirectory: logDir,
+            }),
+          },
+        );
 
       // Collect mocks from the plugins execution.
       const pluginsMocks = await getMocksFromPlugins(logger, plugins);

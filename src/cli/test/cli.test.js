@@ -1,6 +1,4 @@
-import {
-  afterEach, beforeAll, describe, expect, it, vi,
-} from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { buildCLI } from '../cli.js';
 import { version } from '../utils/getPackageInfo.js';
@@ -84,25 +82,23 @@ describe('Plugins', () => {
   it('should not create the service worker if there are no plugins', async () => {
     const result = await cli(['-c', 'src/cli/test/mockme.config.mjs']);
 
-    expect(result.error).toBe(
-      'Nothing to be processed. The output was not generated.',
-    );
+    expect(result.error).toBe('Nothing to be processed. The output was not generated.');
   });
 
   it('should not error if there is one plugin at least', async () => {
     const result = await cli([], {
       config: {
         output: 'src/cli/test/outputs/.storybook/service-worker.plugins.js',
-        plugins: [{
-          name: 'mockme-plugin-test',
-          handler: () => Promise.resolve({}),
-        }],
+        plugins: [
+          {
+            name: 'mockme-plugin-test',
+            handler: () => Promise.resolve({}),
+          },
+        ],
       },
     });
 
-    expect(result.error).not.toBe(
-      'Nothing to be processed. The output was not generated.',
-    );
+    expect(result.error).not.toBe('Nothing to be processed. The output was not generated.');
   });
 
   it('should call the plugin handler', async () => {

@@ -1,6 +1,4 @@
-import {
-  describe, expect, it, vi,
-} from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { WritableStream } from 'memory-streams';
 import nodeConsole from 'node:console';
 
@@ -66,8 +64,9 @@ describe('ConsoleFactory', () => {
       );
 
       ['out', 'err'].forEach((value, index) => {
-        expect(createStream.mock.calls[index]).to
-          .match(new RegExp(`${outputDirectory}\\d{4}-\\d{1,2}-\\d{1,2}\\.${value}\\.log`));
+        expect(createStream.mock.calls[index]).to.match(
+          new RegExp(`${outputDirectory}\\d{4}-\\d{1,2}-\\d{1,2}\\.${value}\\.log`),
+        );
       });
     });
   });

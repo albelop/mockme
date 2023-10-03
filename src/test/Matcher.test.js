@@ -1,6 +1,4 @@
-import {
-  describe, expect, it, vi,
-} from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Matcher } from '../Matcher.js';
 
 describe('Matcher', () => {
@@ -17,11 +15,12 @@ describe('Matcher', () => {
 
   it('should parse and validate the schema of the mocks', () => {
     expect(
-      () => new Matcher([
-        {
-          name: 'value',
-        },
-      ]),
+      () =>
+        new Matcher([
+          {
+            name: 'value',
+          },
+        ]),
     ).toThrowError('Matcher expects an array of objects within a mock shape.');
   });
 
@@ -314,9 +313,7 @@ describe('Matcher', () => {
 
       expect(() => {
         matcher.scenario = 'b';
-      }).toThrow(
-        'Scenario b is not a valid one. Valid scenario options are a.',
-      );
+      }).toThrow('Scenario b is not a valid one. Valid scenario options are a.');
     });
 
     it('can be called with a Request instance', async () => {
@@ -333,9 +330,7 @@ describe('Matcher', () => {
         },
       ]);
 
-      const { response } = await matcher.match(
-        new Request('http:/test.com/test'),
-      );
+      const { response } = await matcher.match(new Request('http:/test.com/test'));
 
       const result = await response.json();
 

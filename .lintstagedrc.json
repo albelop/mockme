@@ -1,0 +1,4 @@
+{
+  "*.js": ["eslint -c .eslintrc.cjs --no-eslintrc --fix"],
+  "*.{js,json}": ["prettier --write"]
+}

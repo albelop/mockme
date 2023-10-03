@@ -6,9 +6,9 @@ export class PrefixedLogger {
   #logger;
 
   constructor({
-      logger,
-      prefix,
-              } = {}) {
+    logger,
+    prefix,
+  } = {}) {
     this.#logger = logger;
     this.#prefix = prefix;
   }

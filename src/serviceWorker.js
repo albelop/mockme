@@ -1,9 +1,9 @@
-import {Matcher} from "./Matcher.js";
+import { Matcher } from './Matcher.js';
 
-const BROADCAST_CHANNEL = "mockme";
-const GET_SCENARIOS_MESSAGE_TYPE = "get:scenarios";
-const SET_SCENARIO_MESSAGE_TYPE = "set:scenario";
-export const SCENARIOS_MESSAGE_TYPE = "scenarios";
+const BROADCAST_CHANNEL = 'mockme';
+const GET_SCENARIOS_MESSAGE_TYPE = 'get:scenarios';
+const SET_SCENARIO_MESSAGE_TYPE = 'set:scenario';
+export const SCENARIOS_MESSAGE_TYPE = 'scenarios';
 
 export const channel = new BroadcastChannel(BROADCAST_CHANNEL);
 
@@ -18,17 +18,17 @@ export function getScenarios() {
 export default function serviceWorker(sw, mocks) {
   const matcher = new Matcher(mocks);
 
-  sw.addEventListener("fetch", (event) => {
+  sw.addEventListener('fetch', (event) => {
     const path = new URL(event.request.url).pathname;
 
-    if (path.indexOf(".") === -1 && path !== "/") {
+    if (path.indexOf('.') === -1 && path !== '/') {
       event.respondWith(
-        matcher.match(event.request).then((match) => match.delayedResponse())
+        matcher.match(event.request).then(match => match.delayedResponse()),
       );
     }
   });
 
-  channel.addEventListener("message", (event) => {
+  channel.addEventListener('message', (event) => {
     if (event.data && event.data.type === GET_SCENARIOS_MESSAGE_TYPE) {
       channel.postMessage({
         type: SCENARIOS_MESSAGE_TYPE,

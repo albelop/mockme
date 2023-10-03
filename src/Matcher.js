@@ -2,7 +2,7 @@ import { match } from "path-to-regexp";
 import { mockSchema } from "./schemas.js";
 import { httpCookie } from "cookie-muncher";
 
-export default class Matcher {
+export class Matcher {
   #mocks = [];
 
   #scenarios = [];
@@ -111,7 +111,6 @@ export default class Matcher {
 
     const noScenarioMock = mocks.find((m) => !m.scenario);
     const inScenarioMock = mocks.find((m) => m.scenario === scenario);
-
     const mock = !scenario ? noScenarioMock : inScenarioMock || noScenarioMock;
 
     if (mock) {
@@ -267,6 +266,7 @@ async function parseRequest(request = {}) {
     return request;
   }
 }
+
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

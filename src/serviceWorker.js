@@ -1,4 +1,4 @@
-import Matcher from "./matcher.js";
+import {Matcher} from "./Matcher.js";
 
 const BROADCAST_CHANNEL = "mockme";
 const GET_SCENARIOS_MESSAGE_TYPE = "get:scenarios";

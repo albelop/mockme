@@ -1,6 +1,7 @@
 import z from "zod";
 
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+
 const jsonSchema = z.lazy(() =>
   z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)])
 );
@@ -27,11 +28,13 @@ const MockRequestSchema = z.object({
     })
     .optional(),
 });
+
 const PlainObjectResponse = z.object({
   headers: jsonSchema.optional(),
   body: jsonSchema.optional(),
   status: z.number().optional(),
 });
+
 const MockResponseSchema = z.union([
   z.custom((value) => {
     return typeof value === "function";

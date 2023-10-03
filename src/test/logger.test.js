@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useLogger } from "../logger.js";
-import FileLogger from "../loggers/FileLogger.js";
 import ConsoleLogger from "../loggers/ConsoleLogger.js";
+import FileLogger from "../loggers/FileLogger.js";
 
 describe("logger", () => {
   it("should return an console as logger by default", () => {
@@ -83,6 +83,7 @@ describe("logger", () => {
 
     it("should create the log file if it does not exist", () => {
       const logger = new FileLogger("./src/test/outputs");
+
       logger.log("this is the message");
     });
   });

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import Matcher from "../matcher";
+import {Matcher} from "../Matcher.js";
 
 describe("Matcher", () => {
   it("should be constructable", () => {

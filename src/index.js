@@ -1,4 +1,4 @@
-export { default as Matcher } from "./matcher.js";
+export { Matcher } from "./Matcher.js";
 export {
   default as sw,
   getScenarios,

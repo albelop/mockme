@@ -1,4 +1,4 @@
-name: Release
+name: Build and Publish
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  release:
-    name: Release
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -23,10 +23,23 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
+  
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    needs: [setup]
+    steps:
+      - name: Lint source code
+        run: npm lint
 
-      - name: Test
+      - name: Run unit tests
         run: npm test
-
+  
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [verify]
+    steps:
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
@@ -35,3 +48,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  

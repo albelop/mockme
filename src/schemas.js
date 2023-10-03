@@ -1,21 +1,13 @@
-import z from "zod";
+import z from 'zod';
 
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 
 const jsonSchema = z.lazy(() =>
-  z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)])
+  z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)]),
 );
 
 const MockRequestSchema = z.object({
-  method: z.enum([
-    "GET",
-    "POST",
-    "PUT",
-    "HEAD",
-    "DELETE",
-    "OPTIONS",
-    "CONNECT",
-  ]),
+  method: z.enum(['GET', 'POST', 'PUT', 'HEAD', 'DELETE', 'OPTIONS', 'CONNECT']),
   path: z.string(),
   body: jsonSchema.optional(),
   conditions: z
@@ -36,9 +28,7 @@ const PlainObjectResponse = z.object({
 });
 
 const MockResponseSchema = z.union([
-  z.custom((value) => {
-    return typeof value === "function";
-  }),
+  z.custom(value => typeof value === 'function'),
   PlainObjectResponse,
 ]);
 

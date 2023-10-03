@@ -35,10 +35,10 @@ $ pnpm add -D @betheweb/mockme
 The config file `mockme.config.mjs` should be placed in the root of your project. Here is an example:
 
 ```js
-import mockmeJsPlugin from "@betheweb/mockme-js-plugin";
+import mockmeJsPlugin from '@betheweb/mockme-js-plugin';
 
 export default {
-  output: "demo/service-worker.js",
+  output: 'demo/service-worker.js',
   plugins: [
     mockmeJsPlugin({
       // plugin config
@@ -50,12 +50,12 @@ export default {
 If you need to have the different scenarios in your demo, you can generate an scenarios file that will have a default export with a list of strings for each one. To generate it include it in your config:
 
 ```js
-import mockmeJsPlugin from "@betheweb/mockme-js-plugin";
+import mockmeJsPlugin from '@betheweb/mockme-js-plugin';
 
 export default {
-  output: "demo/service-worker.js",
+  output: 'demo/service-worker.js',
   scenarios: {
-    output: "demo/scenarios.js",
+    output: 'demo/scenarios.js',
   },
 };
 ```
@@ -88,7 +88,7 @@ The function which is going to use the config to generate the output.
 export function plugin(config) {
   return {
     name: 'mockme-plugin-test',
-    handler: () =>  [], // Returns an array of objects that have a mock schema
+    handler: () => [], // Returns an array of objects that have a mock schema
   };
 }
 ```
@@ -287,27 +287,24 @@ To the service worker to match a request and return a mock data for it, the requ
 
 ```js
 const myHeaders = new Headers();
-myHeaders.append("Content-Type", "application/json");
-myHeaders.append("Authorization", "Bearer abcd");
-myHeaders.append("Cookie", "token=12345");
+myHeaders.append('Content-Type', 'application/json');
+myHeaders.append('Authorization', 'Bearer abcd');
+myHeaders.append('Cookie', 'token=12345');
 
 const raw = JSON.stringify({
-  role: "admin",
-  title: "Harry Potter",
+  role: 'admin',
+  title: 'Harry Potter',
 });
 
 const requestOptions = {
-  method: "GET",
+  method: 'GET',
   headers: myHeaders,
   body: raw,
 };
 
 async function updateBook() {
   try {
-    const response = await fetch(
-      "http://test.com/api/v1/books/1?pages=100",
-      requestOptions
-    );
+    const response = await fetch('http://test.com/api/v1/books/1?pages=100', requestOptions);
     const result = await response.json();
   } catch (error) {
     console.log(error);

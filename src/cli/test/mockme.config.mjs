@@ -1,3 +1,3 @@
 export default {
-  output: "src/cli/test/outputs/.storybook/sw.js",
+  output: 'src/cli/test/outputs/.storybook/sw.js',
 };

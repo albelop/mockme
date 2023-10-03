@@ -1,0 +1,9 @@
+{
+  "MD014": false,
+  "line-length": {
+    "line_length": -1
+  },
+  "no-trailing-punctuation": {
+    "punctuation": ".,;:!。，；：！"
+  }
+}

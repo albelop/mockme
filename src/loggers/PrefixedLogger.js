@@ -5,10 +5,7 @@ export class PrefixedLogger {
   /** @type {Logger} */
   #logger;
 
-  constructor({
-      logger,
-      prefix,
-              } = {}) {
+  constructor({ logger, prefix } = {}) {
     this.#logger = logger;
     this.#prefix = prefix;
   }

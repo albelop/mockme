@@ -1,5 +1,5 @@
 {
-  "*.js": ["eslint -c .eslintrc.cjs --no-eslintrc --fix"],
-  "*.{js,json}": ["prettier --write"],
+  "*.{js,mjs,cjs}": ["eslint -c .eslintrc.cjs --no-eslintrc --fix"],
+  "*.{js,mjs,cjs,json}": ["prettier --write"],
   "*.md": ["prettier --write", "markdownlint --fix"]
 }

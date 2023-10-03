@@ -13,7 +13,7 @@ function mockKey(mock) {
     mock.scenario,
     JSON.stringify(mock.request.conditions || 'default'),
   ]
-    .filter(x => x)
+    .filter((x) => x)
     .join('--')
     .toLowerCase();
 }
@@ -29,7 +29,7 @@ async function getMocksFromPlugins(logger, plugins = []) {
 function filterMocksWithValidSchema(mocks, schema) {
   return mocks
     .flat()
-    .filter(x => x)
+    .filter((x) => x)
     .map(schema.parse.bind(schema))
     .reduce((result, mock) => {
       result.set(mockKey(mock), mock);
@@ -126,7 +126,7 @@ async function writeScenariosFile(output, content) {
  * @param {string} configFileName
  * @returns {Promise<*>}
  */
-const getConfig = async configFileName => {
+const getConfig = async (configFileName) => {
   try {
     return (await import(join(process.cwd(), configFileName)))?.default;
   } catch (error) {
@@ -149,7 +149,7 @@ export default function createServiceWorkerAction(customConfig) {
       }
 
       // Create the logger
-      const logger = prefix =>
+      const logger = (prefix) =>
         LoggerFactory.get(
           {
             prefix,

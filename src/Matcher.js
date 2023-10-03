@@ -26,11 +26,11 @@ function compareObjects(a, b = {}) {
 // FIXME
 // eslint-disable-next-line consistent-return
 function containedObjects(a, b = {}) {
-  const aKeys = Object.keys(a).map(str => str.toLowerCase());
-  const bKeys = Object.keys(b).map(str => str.toLowerCase());
+  const aKeys = Object.keys(a).map((str) => str.toLowerCase());
+  const bKeys = Object.keys(b).map((str) => str.toLowerCase());
 
   // Match bKeys are included in aKeys
-  const bKeysIncluded = bKeys.filter(bKey => aKeys.includes(bKey)).length === bKeys.length;
+  const bKeysIncluded = bKeys.filter((bKey) => aKeys.includes(bKey)).length === bKeys.length;
 
   if (!bKeysIncluded) {
     return false;
@@ -107,17 +107,17 @@ async function parseRequest(request = {}) {
   return request;
 }
 
-const timeout = ms =>
-  new Promise(resolve => {
+const timeout = (ms) =>
+  new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 
 function filterEmptyOptions(obj = {}) {
-  const isNonEmptyArray = value => Array.isArray(value) && value.length !== 0;
-  const isNonEmptyObject = value => typeof value === 'object' && Object.keys(value).length !== 0;
-  const isNonEmptyValue = value =>
+  const isNonEmptyArray = (value) => Array.isArray(value) && value.length !== 0;
+  const isNonEmptyObject = (value) => typeof value === 'object' && Object.keys(value).length !== 0;
+  const isNonEmptyValue = (value) =>
     typeof value !== 'object' && (Boolean(value) || value === 0 || value === false);
-  const isNonEmpty = value =>
+  const isNonEmpty = (value) =>
     isNonEmptyArray(value) || isNonEmptyObject(value) || isNonEmptyValue(value);
 
   return Object.keys(obj).reduce((result, key) => {
@@ -155,7 +155,7 @@ export class Matcher {
     const mocksIsAnArray = Array.isArray(mocks);
     let validShape = true;
     try {
-      mocks.forEach(mock => mockSchema.parse(mock));
+      mocks.forEach((mock) => mockSchema.parse(mock));
     } catch (error) {
       validShape = false;
     }
@@ -181,7 +181,7 @@ export class Matcher {
   static #prepareMocks(mocks = []) {
     const scenarios = new Set();
     const paths = new Set();
-    const parsedMocks = mocks.map(mock => {
+    const parsedMocks = mocks.map((mock) => {
       const { method, path } = mock.request;
 
       if (mock.scenario) scenarios.add(mock.scenario);
@@ -247,8 +247,8 @@ export class Matcher {
         ),
     );
 
-    const noScenarioMock = mocks.find(m => !m.scenario);
-    const inScenarioMock = mocks.find(m => m.scenario === scenario);
+    const noScenarioMock = mocks.find((m) => !m.scenario);
+    const inScenarioMock = mocks.find((m) => m.scenario === scenario);
     const mock = !scenario ? noScenarioMock : inScenarioMock || noScenarioMock;
 
     if (mock) {

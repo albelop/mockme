@@ -7,7 +7,7 @@ describe('PrefixedLogger', () => {
     expect(new PrefixedLogger()).toBeInstanceOf(PrefixedLogger);
   });
 
-  ['log', 'warn', 'error'].forEach(method => {
+  ['log', 'warn', 'error'].forEach((method) => {
     it(`should call logger.${method} prefixing the message`, () => {
       const decorated = { [method]: vi.fn() };
       const prefix = '[prefix]';

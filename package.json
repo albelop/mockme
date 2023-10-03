@@ -13,11 +13,11 @@
   },
   "scripts": {
     "format": "run-s format:*",
-    "format:eslint": "eslint --ext .js . --fix",
+    "format:eslint": "eslint --ext .js,.mjs,.cjs . --fix",
     "format:markdownlint": "markdownlint **/*.md --fix",
     "format:prettier": "prettier \"**/**/*.{js,mjs,json,md,mdx}\" --write",
     "lint": "run-s lint:*",
-    "lint:eslint": "eslint --ext .js .",
+    "lint:eslint": "eslint --ext .js,.mjs,.cjs .",
     "lint:markdownlint": "markdownlint **/*.md",
     "lint:prettier": "prettier \"**/*.{js,mjs,json,md,mdx}\" --list-different || (echo '↑↑ these files are not prettier formatted ↑↑' && exit 1)",
     "publish": "changeset publish",

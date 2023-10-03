@@ -17,7 +17,7 @@
     "format:markdownlint": "markdownlint **/*.md --fix",
     "format:prettier": "prettier \"**/**/*.{js,mjs,json,md,mdx}\" --write",
     "lint": "run-s lint:*",
-    "lint:eslint": "eslint",
+    "lint:eslint": "eslint --ext .js .",
     "lint:markdownlint": "markdownlint **/*.md",
     "lint:prettier": "prettier \"**/*.{js,mjs,json,md,mdx}\" --list-different || (echo '↑↑ these files are not prettier formatted ↑↑' && exit 1)",
     "publish": "changeset publish",

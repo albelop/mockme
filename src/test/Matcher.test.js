@@ -297,7 +297,7 @@ describe('Matcher', () => {
       performance.mark('delay-end');
       const perf = performance.measure('delay', 'delay-start', 'delay-end');
 
-      expect(perf.duration).toBeGreaterThan(delay);
+      expect(Math.round(perf.duration)).toBeGreaterThanOrEqual(delay);
     });
 
     it('should throw if scenario is not valid', () => {

@@ -28,7 +28,7 @@ const PlainObjectResponse = z.object({
 });
 
 const MockResponseSchema = z.union([
-  z.custom(value => typeof value === 'function'),
+  z.custom((value) => typeof value === 'function'),
   PlainObjectResponse,
 ]);
 

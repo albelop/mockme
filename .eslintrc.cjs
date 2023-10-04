@@ -8,7 +8,6 @@ module.exports = {
     browser: false,
   },
   rules: {
-    'arrow-parens': ['error', 'as-needed', {requireForBlockBody: true}],
     'no-restricted-syntax': [
       'error',
       {

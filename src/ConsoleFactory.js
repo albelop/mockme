@@ -2,7 +2,7 @@ import { createWriteStream, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import nodeConsole from 'node:console';
 
-const getFileName = type => {
+const getFileName = (type) => {
   const today = new Date();
   const day = today.getDate();
   const month = today.getMonth();
@@ -15,8 +15,8 @@ export class ConsoleFactory {
   static get(
     { outputDirectory } = {},
     {
-      createDirectory = directory => mkdirSync(directory, { recursive: true }),
-      createStream = path => createWriteStream(path),
+      createDirectory = (directory) => mkdirSync(directory, { recursive: true }),
+      createStream = (path) => createWriteStream(path),
     } = {},
   ) {
     if (outputDirectory) {

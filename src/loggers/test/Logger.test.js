@@ -7,7 +7,7 @@ describe('Logger', () => {
     expect(new Logger()).toBeInstanceOf(Logger);
   });
 
-  ['log', 'warn', 'error'].forEach(method => {
+  ['log', 'warn', 'error'].forEach((method) => {
     it(`should call console.${method} with the message`, () => {
       const consoleMock = { [method]: vi.fn() };
       const logger = new Logger(consoleMock);

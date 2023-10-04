@@ -2,7 +2,7 @@ import * as esbuild from 'esbuild';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { mockSchema } from '../schemas.js';
+import { MockSchema } from '../schemas/MockSchema.js';
 import { LoggerFactory } from '../LoggerFactory.js';
 import { ConsoleFactory } from '../ConsoleFactory.js';
 
@@ -165,7 +165,7 @@ export default function createServiceWorkerAction(customConfig) {
       const pluginsMocks = await getMocksFromPlugins(logger, plugins);
 
       // Filter mocks with only those with a valid mock schema.
-      const mocks = filterMocksWithValidSchema(pluginsMocks, mockSchema);
+      const mocks = filterMocksWithValidSchema(pluginsMocks, MockSchema);
 
       // Extract scenario content to include in the scenarios file.
       const scenariosContent = generateScenariosString(mocks);

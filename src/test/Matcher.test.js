@@ -43,6 +43,7 @@ describe('Matcher', () => {
           path: '/test',
         },
         response: {
+          status: 200,
           body: { scenario: 'a' },
         },
         scenario: 'a',
@@ -53,6 +54,7 @@ describe('Matcher', () => {
           path: '/test',
         },
         response: {
+          status: 200,
           body: { scenario: 'b' },
         },
         scenario: 'b',
@@ -69,11 +71,17 @@ describe('Matcher', () => {
           method: 'GET',
           path: '/test-a',
         },
+        response: {
+          status: 200,
+        },
       },
       {
         request: {
           method: 'GET',
           path: '/test-b',
+        },
+        response: {
+          status: 200,
         },
       },
     ]);
@@ -111,13 +119,13 @@ describe('Matcher', () => {
       expect(response).toBeInstanceOf(Response);
     });
 
-    it('should match a mock by method, path and header', async () => {
+    it('should match a mock by method, path and headers', async () => {
       const matcher = new Matcher([
         {
           request: {
             method: 'GET',
             path: '/',
-            conditions: { header: { a: 1 } },
+            conditions: { headers: { a: 1 } },
           },
           response: { status: 200, body: {} },
         },
@@ -126,19 +134,19 @@ describe('Matcher', () => {
       const { response } = await matcher.match({
         method: 'GET',
         path: '/',
-        header: { a: '1' },
+        headers: { a: '1' },
       });
 
       expect(response).toHaveProperty('status', 200);
     });
 
-    it('should match a mock by method, path, header and url', async () => {
+    it('should match a mock by method, path, headers and url', async () => {
       const matcher = new Matcher([
         {
           request: {
             method: 'GET',
             path: '/:id',
-            conditions: { header: { a: 1 } },
+            conditions: { headers: { a: 1 } },
           },
           response: { status: 200, body: {} },
         },
@@ -147,19 +155,19 @@ describe('Matcher', () => {
       const { response } = await matcher.match({
         method: 'GET',
         path: '/1',
-        header: { a: '1' },
+        headers: { a: '1' },
       });
 
       expect(response).toHaveProperty('status', 200);
     });
 
-    it('should match a mock by method, path and cookie', async () => {
+    it('should match a mock by method, path and cookies', async () => {
       const matcher = new Matcher([
         {
           request: {
             method: 'GET',
             path: '/',
-            conditions: { cookie: { a: 1 } },
+            conditions: { cookies: { a: 1 } },
           },
           response: { status: 200, body: {} },
         },
@@ -168,24 +176,24 @@ describe('Matcher', () => {
       const { response } = await matcher.match({
         method: 'GET',
         path: '/',
-        cookie: 'a=1',
+        cookies: 'a=1',
       });
 
       expect(response).toHaveProperty('status', 200);
     });
 
-    it('should match a mock by method, path, headers, cookie, url, query, queryParam, param and body', async () => {
+    it('should match a mock by method, path, headers, cookies, url, query, queryParam, param and body', async () => {
       const matcher = new Matcher([
         {
           request: {
             method: 'GET',
             path: '/:id',
             conditions: {
-              header: { a: 1 },
+              headers: { a: 1 },
               body: { b: 2 },
               query: { c: 3 },
               param: { d: 4 },
-              cookie: { f: 6 },
+              cookies: { f: 6 },
             },
           },
           response: { status: 200, body: {} },
@@ -195,11 +203,11 @@ describe('Matcher', () => {
       const { response } = await matcher.match({
         method: 'GET',
         path: '/1',
-        header: { a: '1' },
+        headers: { a: '1' },
         url: { id: 1 },
         body: { b: 2 },
         query: { c: 3 },
-        cookie: 'f=6',
+        cookies: 'f=6',
       });
 
       expect(response).toHaveProperty('status', 200);
@@ -213,6 +221,7 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body: { scenario: 'a' },
           },
           scenario: 'a',
@@ -223,6 +232,7 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body: { scenario: 'b' },
           },
           scenario: 'b',
@@ -249,6 +259,7 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body: { scenario: 'no scenario' },
           },
         },
@@ -258,6 +269,7 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body: { scenario: 'b' },
           },
           scenario: 'b',
@@ -281,6 +293,9 @@ describe('Matcher', () => {
           request: {
             method: 'GET',
             path: '/test',
+          },
+          response: {
+            status: 200,
           },
           delay,
         },
@@ -307,6 +322,9 @@ describe('Matcher', () => {
             method: 'GET',
             path: '/test',
           },
+          response: {
+            status: 200,
+          },
           scenario: 'a',
         },
       ]);
@@ -325,6 +343,7 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body,
           },
         },
@@ -373,7 +392,7 @@ describe('Matcher', () => {
       expect(responseFn).toHaveBeenCalledWith({
         body: requestBody,
         url: { id: '1' },
-        header: { 'content-type': 'text/plain;charset=UTF-8' },
+        headers: { 'content-type': 'text/plain;charset=UTF-8' },
       });
     });
 
@@ -399,7 +418,7 @@ describe('Matcher', () => {
       expect(responseFn).toHaveBeenCalledWith({
         body: requestBody,
         url: { id: '1' },
-        header: {
+        headers: {
           ...Object.fromEntries(requestHeaders),
           'content-type': 'text/plain;charset=UTF-8',
         },

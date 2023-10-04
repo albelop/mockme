@@ -1,6 +1,6 @@
 import { match } from 'path-to-regexp';
 import { httpCookie } from 'cookie-muncher';
-import { mockSchema } from './schemas.js';
+import { MockSchema } from './schemas/MockSchema.js';
 
 function compareObjects(a, b = {}) {
   let isEqual = true;
@@ -23,8 +23,6 @@ function compareObjects(a, b = {}) {
   return isEqual;
 }
 
-// FIXME
-// eslint-disable-next-line consistent-return
 function containedObjects(a, b = {}) {
   const aKeys = Object.keys(a).map((str) => str.toLowerCase());
   const bKeys = Object.keys(b).map((str) => str.toLowerCase());
@@ -37,33 +35,32 @@ function containedObjects(a, b = {}) {
   }
 
   // Match values
-  if (bKeysIncluded) {
-    const bKeysLowered = Object.keys(b).reduce((result, key) => {
+  const bKeysLowered = Object.keys(b).reduce((result, key) => {
+    // eslint-disable-next-line no-param-reassign
+    result[key.toLowerCase()] = b[key];
+    return result;
+  }, {});
+
+  const aFiltered = Object.keys(a).reduce((result, key) => {
+    if (
+      bKeys.includes(key.toLowerCase()) &&
+      a[key].toString() === bKeysLowered[key.toLowerCase()].toString()
+    ) {
       // eslint-disable-next-line no-param-reassign
-      result[key.toLowerCase()] = b[key];
-      return result;
-    }, {});
-    const aFiltered = Object.keys(a).reduce((result, key) => {
-      if (
-        bKeys.includes(key.toLowerCase()) &&
-        a[key].toString() === bKeysLowered[key.toLowerCase()].toString()
-      ) {
-        // eslint-disable-next-line no-param-reassign
-        result[key.toLowerCase()] = a[key].toString();
-      }
+      result[key.toLowerCase()] = a[key].toString();
+    }
 
-      return result;
-    }, {});
+    return result;
+  }, {});
 
-    return compareObjects(aFiltered, bKeysLowered);
-  }
+  return compareObjects(aFiltered, bKeysLowered);
 }
 
-function matchConditions({ header, cookie, body, query, url }, request) {
+function matchConditions({ headers, cookies, body, query, url }, request) {
   return (
     (request.conditions?.url ? compareObjects(url, request.conditions?.url) : true) &&
-    containedObjects(header, request.conditions?.header) &&
-    compareObjects(cookie, request.conditions?.cookie) &&
+    containedObjects(headers, request.conditions?.headers) &&
+    compareObjects(cookies, request.conditions?.cookies) &&
     compareObjects(body, request.conditions?.body) &&
     compareObjects(query, request.conditions?.query)
   );
@@ -84,12 +81,13 @@ async function parseRequest(request = {}) {
     );
 
     const headers = Object.fromEntries(request.headers.entries());
-    requestOptions.header = Object.keys(headers).reduce((result, headerKey) => {
-      // eslint-disable-next-line no-param-reassign
-      result[headerKey.toLowerCase()] = headers[headerKey];
-
-      return result;
-    }, {});
+    requestOptions.headers = Object.keys(headers).reduce(
+      (result, headerKey) => ({
+        ...result,
+        [headerKey.toLowerCase()]: headers[headerKey],
+      }),
+      {},
+    );
 
     // request body and header
     const originalRequest = {};
@@ -99,11 +97,12 @@ async function parseRequest(request = {}) {
     } catch {
       // do nothing
     } finally {
-      originalRequest.header = Object.fromEntries(request.headers);
+      originalRequest.headers = Object.fromEntries(request.headers);
     }
 
     return { ...requestOptions, request: originalRequest };
   }
+
   return request;
 }
 
@@ -154,8 +153,9 @@ export class Matcher {
   constructor(mocks = []) {
     const mocksIsAnArray = Array.isArray(mocks);
     let validShape = true;
+
     try {
-      mocks.forEach((mock) => mockSchema.parse(mock));
+      mocks.forEach((mock) => MockSchema.parse(mock));
     } catch (error) {
       validShape = false;
     }
@@ -211,7 +211,10 @@ export class Matcher {
       response: result,
       delay,
       delayedResponse: async () => {
-        if (delay) await timeout(delay);
+        if (delay) {
+          await timeout(delay);
+        }
+
         return result;
       },
     };
@@ -220,16 +223,16 @@ export class Matcher {
   #findMock({
     method,
     path,
-    header = {},
-    cookie = '',
+    headers = {},
+    cookies = '',
     body = {},
     query = {},
     scenario = this.#scenario,
     request = {},
   }) {
     const requestOptions = {
-      header,
-      cookie: cookieParse(cookie),
+      headers,
+      cookies: cookieParse(cookies),
       body,
       query,
     };
@@ -262,7 +265,7 @@ export class Matcher {
           // @ts-ignore
           body: request.body || {},
           // @ts-ignore
-          header: request.header || {},
+          headers: request.headers || {},
         };
 
         mockResponse = response(filterEmptyOptions(responseOptions));
@@ -273,14 +276,14 @@ export class Matcher {
       const {
         body: mockBody = {},
         status = 200,
-        headers = {},
+        headers: mockHeaders = {},
         delay: responseDelay,
       } = mockResponse;
 
       // @ts-ignore
       const result = Response.json(mockBody, {
         status,
-        headers: new Headers(headers),
+        headers: new Headers(mockHeaders),
       });
 
       return { result, delay: responseDelay || mockDelay };

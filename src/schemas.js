@@ -7,7 +7,7 @@ const jsonSchema = z.lazy(() =>
 );
 
 const MockRequestSchema = z.object({
-  method: z.enum(['GET', 'POST', 'PUT', 'HEAD', 'DELETE', 'OPTIONS', 'CONNECT']),
+  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'HEAD', 'DELETE', 'OPTIONS', 'CONNECT']),
   path: z.string(),
   body: jsonSchema.optional(),
   conditions: z

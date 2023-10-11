@@ -47,6 +47,8 @@ jobs:
         uses: changesets/action@v1
         with:
           publish: npm run publish
+          commit: 'chore: release new package version'
+          title: 'chore: release new package version'
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

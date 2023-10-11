@@ -1,5 +1,11 @@
 # @betheweb/mockme
 
+## 0.2.1
+
+### Patch Changes
+
+- 195c4d9: support PATCH HTTP verb
+
 ## 0.2.0
 
 ### Minor Changes

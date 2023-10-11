@@ -1,6 +1,6 @@
 {
   "name": "@betheweb/mockme",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A mock service worker generator",
   "main": "src/index.js",
   "type": "module",

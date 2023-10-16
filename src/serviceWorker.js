@@ -18,11 +18,22 @@ export function getScenarios() {
 export default function serviceWorker(sw, mocks) {
   const matcher = new Matcher(mocks);
 
-  sw.addEventListener('fetch', (event) => {
-    const path = new URL(event.request.url).pathname;
+  sw.addEventListener('fetch', async (event) => {
+    const { request } = event;
+    const path = new URL(request.url).pathname;
+
+    if (request.headers.get('accept').indexOf('application/json') === -1) return;
 
     if (path.indexOf('.') === -1 && path !== '/') {
-      event.respondWith(matcher.match(event.request).then((match) => match.delayedResponse()));
+      event.respondWith(
+        (async function matchRequest() {
+          const match = await matcher.match(request);
+          if (match) {
+            return match.delayedResponse();
+          }
+          return undefined;
+        })(),
+      );
     }
   });
 

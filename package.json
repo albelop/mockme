@@ -9,7 +9,8 @@
     "mockme": "src/cli/index.js"
   },
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./ServiceWorkerManager.js": "./src/ServiceWorkerManager.js"
   },
   "scripts": {
     "format": "run-s format:*",

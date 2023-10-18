@@ -30,6 +30,7 @@ describe('ServiceWorkerManager', () => {
     // @ts-ignore
     globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
 
+    // @ts-ignore
     const swm = new ServiceWorkerManager({ serviceWorker: null });
     swm.register();
 
@@ -45,10 +46,12 @@ describe('ServiceWorkerManager', () => {
 
     // @ts-ignore
     const swm = new ServiceWorkerManager({
+      // @ts-ignore
       serviceWorker: {
         register: () => {
           throw Error('registration error');
         },
+        // @ts-ignore
         ready: Promise.resolve({ update: vi.fn() }),
       },
     });

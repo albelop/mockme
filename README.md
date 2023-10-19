@@ -47,7 +47,7 @@ export default {
 };
 ```
 
-If you need to have the different scenarios in your demo, you can generate an scenarios file that will have a default export with a list of strings for each one. To generate it include it in your config:
+If you have the different scenarios for your mocks, mockme can generate an **scenarios.js** file that will include the list of scenarios. Include the scenarios output it in your config:
 
 ```js
 import mockmeJsPlugin from '@betheweb/mockme-js-plugin';
@@ -58,6 +58,42 @@ export default {
     output: 'demo/scenarios.js',
   },
 };
+```
+
+## How to use it
+
+In order to generate the service worker file from the command line, add the next script in your **package.json** file
+
+```json
+{
+  "scripts": {
+    "mocks:sw": "mockme"
+  }
+}
+```
+
+If the config file is not in the root or you named it differently, just use the `-c, --config` option.
+
+```json
+{
+  "scripts": {
+    "mocks:sw": "mockme --config path/to/my/mockmeconfig.mjs"
+  }
+}
+```
+
+Once the service worker file is generated, it is time to use it in the code. In order to help in this task, mockme provides a manager to wire up all at once so you don't need to do it by yourself. Just import the ServiceWorkerManager and call the register function with the path where the service provider was generated.
+
+```html
+<html>
+  <head>
+    <script type="module">
+      import { ServiceWorkerManager } from '@betheweb/mockme/ServiceWorkerManager.js';
+
+      ServiceWorkerManager.register('./sw.js');
+    </script>
+  </head>
+</html>
 ```
 
 ## Plugins

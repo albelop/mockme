@@ -3,8 +3,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import { mockSchema } from '../schemas.js';
-import { LoggerFactory } from '../LoggerFactory.js';
-import { ConsoleFactory } from '../ConsoleFactory.js';
+import { LoggerFactory } from './LoggerFactory.js';
+import { ConsoleFactory } from './ConsoleFactory.js';
 
 function mockKey(mock) {
   return [
@@ -94,7 +94,7 @@ async function buildContent(contents) {
 
   if (process.env.MOCKME_TEST) {
     esbuildOptions.alias = {
-      '@betheweb/mockme': './src/index.js',
+      '@betheweb/mockme': './src/sw/index.js',
     };
   }
   // @ts-ignore

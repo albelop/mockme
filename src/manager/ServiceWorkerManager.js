@@ -1,4 +1,4 @@
-import { getUrl, replaceUrl } from './URLTools.js';
+import { getUrl, replaceUrl, getCurrentBaseUrl } from './URLTools.js';
 
 const MOCKME_HOSTNAME_HEADER = 'X-Mockme-Hostname';
 
@@ -20,15 +20,12 @@ export class ServiceWorkerManager {
    * @param {Console} [options.console]
    * @param {ServiceWorkerContainer} [options.serviceWorker]
    * @param {String} [options.hostname]
-   * @param {Boolean} [options.overrideCalls]
    */
   constructor({
     console = globalThis.console,
     // eslint-disable-next-line no-undef
     serviceWorker = navigator.serviceWorker,
-    hostname = `${globalThis.location.protocol}//${globalThis.location.hostname}${
-      globalThis.location.port ? `:${globalThis.location.port}` : ''
-    }`,
+    hostname = getCurrentBaseUrl(),
   } = {}) {
     this.#console = console;
     this.#serviceWorker = serviceWorker;

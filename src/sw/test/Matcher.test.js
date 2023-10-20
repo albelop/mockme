@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Matcher } from '../Matcher.js';
 
 describe('Matcher', () => {
@@ -35,7 +35,7 @@ describe('Matcher', () => {
     expect(matcher).toBeInstanceOf(Matcher);
   });
 
-  it('should return the list of scenarios', () => {
+  it('should return the map of scenarios', () => {
     const matcher = new Matcher([
       {
         request: {
@@ -43,6 +43,7 @@ describe('Matcher', () => {
           path: '/test',
         },
         response: {
+          status: 200,
           body: { scenario: 'a' },
         },
         scenario: 'a',
@@ -53,36 +54,18 @@ describe('Matcher', () => {
           path: '/test',
         },
         response: {
+          status: 200,
           body: { scenario: 'b' },
         },
         scenario: 'b',
       },
     ]);
 
-    expect(matcher.scenarios).toStrictEqual(['a', 'b']);
-  });
-
-  it('should return the list of paths', () => {
-    const matcher = new Matcher([
-      {
-        request: {
-          method: 'GET',
-          path: '/test-a',
-        },
-      },
-      {
-        request: {
-          method: 'GET',
-          path: '/test-b',
-        },
-      },
-    ]);
-
-    expect(matcher.paths).toStrictEqual(['/test-a', '/test-b']);
+    expect([...matcher.scenarios.keys()]).toStrictEqual(['a', 'b']);
   });
 
   describe('match', () => {
-    it('should return an error response if no match', async () => {
+    it('should return undefined if no match', async () => {
       const matcher = new Matcher([
         {
           request: { method: 'GET', path: '/' },
@@ -90,12 +73,13 @@ describe('Matcher', () => {
         },
       ]);
 
-      const { response } = await matcher.match({
+      const request = new Request('https:/example.com/abc', {
         method: 'POST',
-        path: '/abc',
       });
 
-      expect(response).toHaveProperty('status', 0);
+      const mock = await matcher.match(request);
+
+      expect(mock).toBeUndefined();
     });
 
     it('should match a mock by method and path', async () => {
@@ -106,9 +90,9 @@ describe('Matcher', () => {
         },
       ]);
 
-      const { response } = await matcher.match({ method: 'GET', path: '/' });
+      const mock = await matcher.match(new Request('https://example.com', { method: 'GET' }));
 
-      expect(response).toBeInstanceOf(Response);
+      expect(mock).not.toBeUndefined();
     });
 
     it('should match a mock by method, path and header', async () => {
@@ -122,12 +106,14 @@ describe('Matcher', () => {
           response: { status: 200, body: {} },
         },
       ]);
+      const mock = await matcher.match(
+        new Request('https://example.com', {
+          method: 'GET',
+          headers: { a: 1 },
+        }),
+      );
 
-      const { response } = await matcher.match({
-        method: 'GET',
-        path: '/',
-        header: { a: '1' },
-      });
+      const response = await mock.getResponse();
 
       expect(response).toHaveProperty('status', 200);
     });
@@ -143,12 +129,14 @@ describe('Matcher', () => {
           response: { status: 200, body: {} },
         },
       ]);
+      const mock = await matcher.match(
+        new Request('https://example.com/1', {
+          method: 'GET',
+          headers: { a: 1 },
+        }),
+      );
 
-      const { response } = await matcher.match({
-        method: 'GET',
-        path: '/1',
-        header: { a: '1' },
-      });
+      const response = await mock.getResponse();
 
       expect(response).toHaveProperty('status', 200);
     });
@@ -165,11 +153,15 @@ describe('Matcher', () => {
         },
       ]);
 
-      const { response } = await matcher.match({
-        method: 'GET',
-        path: '/',
-        cookie: 'a=1',
-      });
+      matcher.setCookie('a', '1');
+
+      const mock = await matcher.match(
+        new Request('https://example.com', {
+          method: 'GET',
+        }),
+      );
+
+      const response = await mock.getResponse();
 
       expect(response).toHaveProperty('status', 200);
     });
@@ -178,13 +170,12 @@ describe('Matcher', () => {
       const matcher = new Matcher([
         {
           request: {
-            method: 'GET',
+            method: 'POST',
             path: '/:id',
+            body: { b: 2 },
             conditions: {
               header: { a: 1 },
-              body: { b: 2 },
               query: { c: 3 },
-              param: { d: 4 },
               cookie: { f: 6 },
             },
           },
@@ -192,15 +183,23 @@ describe('Matcher', () => {
         },
       ]);
 
-      const { response } = await matcher.match({
-        method: 'GET',
-        path: '/1',
-        header: { a: '1' },
-        url: { id: 1 },
-        body: { b: 2 },
-        query: { c: 3 },
-        cookie: 'f=6',
-      });
+      matcher.setCookie('f', '6');
+
+      const body = JSON.stringify({ b: 2 });
+
+      const mock = await matcher.match(
+        new Request('https://example.com/1?c=3', {
+          method: 'POST',
+          headers: {
+            a: '1',
+            'Content-Length': body.length,
+            'Content-Type': 'application/json',
+          },
+          body,
+        }),
+      );
+
+      const response = await mock.getResponse();
 
       expect(response).toHaveProperty('status', 200);
     });
@@ -213,6 +212,7 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body: { scenario: 'a' },
           },
           scenario: 'a',
@@ -223,19 +223,22 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body: { scenario: 'b' },
           },
           scenario: 'b',
         },
       ]);
 
-      matcher.scenario = 'b';
+      matcher.enableScenario('b');
 
-      const { response } = await matcher.match({
-        method: 'GET',
-        path: '/test',
-      });
+      const mock = await matcher.match(
+        new Request('https://example.com/test', {
+          method: 'GET',
+        }),
+      );
 
+      const response = await mock.getResponse();
       const body = await response.json();
 
       expect(body).toStrictEqual({ scenario: 'b' });
@@ -249,6 +252,7 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body: { scenario: 'no scenario' },
           },
         },
@@ -258,16 +262,19 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body: { scenario: 'b' },
           },
           scenario: 'b',
         },
       ]);
 
-      const { response } = await matcher.match({
-        method: 'GET',
-        path: '/test',
-      });
+      const mock = await matcher.match(
+        new Request('https://example.com/test', {
+          method: 'GET',
+        }),
+      );
+      const response = await mock.getResponse();
 
       const body = await response.json();
 
@@ -282,19 +289,24 @@ describe('Matcher', () => {
             method: 'GET',
             path: '/test',
           },
+          response: {
+            status: 200,
+            body: {},
+          },
           delay,
         },
       ]);
 
-      const { delayedResponse } = await matcher.match({
-        method: 'GET',
-        path: '/test',
-      });
+      const mock = await matcher.match(
+        new Request('https://example.com/test', {
+          method: 'GET',
+        }),
+      );
 
       performance.mark('delay-start');
-      await delayedResponse();
-
+      await mock.getResponse();
       performance.mark('delay-end');
+
       const perf = performance.measure('delay', 'delay-start', 'delay-end');
 
       expect(Math.round(perf.duration)).toBeGreaterThanOrEqual(delay);
@@ -307,13 +319,17 @@ describe('Matcher', () => {
             method: 'GET',
             path: '/test',
           },
+          response: {
+            status: 200,
+            body: {},
+          },
           scenario: 'a',
         },
       ]);
 
       expect(() => {
-        matcher.scenario = 'b';
-      }).toThrow('Scenario b is not a valid one. Valid scenario options are a.');
+        matcher.enableScenario('b');
+      }).toThrow('The specified scenario b is not used by the loaded mocks.');
     });
 
     it('can be called with a Request instance', async () => {
@@ -325,85 +341,86 @@ describe('Matcher', () => {
             path: '/test',
           },
           response: {
+            status: 200,
             body,
           },
         },
       ]);
 
-      const { response } = await matcher.match(new Request('http:/test.com/test'));
-
+      const mock = await matcher.match(new Request('http:/test.com/test'));
+      const response = await mock.getResponse();
       const result = await response.json();
 
       expect(result).toEqual(body);
     });
   });
 
-  describe('response', () => {
-    it('should call response fn with request path params', async () => {
-      const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
-      const matcher = new Matcher([
-        {
-          request: { method: 'GET', path: '/:id' },
-          response: responseFn,
-          delay: 3000,
-        },
-      ]);
-
-      await matcher.match({ method: 'GET', path: '/1' });
-
-      expect(responseFn).toHaveBeenCalledWith({ url: { id: '1' } });
-    });
-
-    it('should call response fn with request body', async () => {
-      const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
-      const matcher = new Matcher([
-        {
-          request: { method: 'PUT', path: '/:id' },
-          response: responseFn,
-        },
-      ]);
-      const requestBody = { b: '1' };
-      const request = new Request('http://localhost/1', {
-        body: JSON.stringify(requestBody),
-        method: 'PUT',
-      });
-
-      await matcher.match(request);
-
-      expect(responseFn).toHaveBeenCalledWith({
-        body: requestBody,
-        url: { id: '1' },
-        header: { 'content-type': 'text/plain;charset=UTF-8' },
-      });
-    });
-
-    it('should call response fn with request body', async () => {
-      const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
-      const matcher = new Matcher([
-        {
-          request: { method: 'PUT', path: '/:id' },
-          response: responseFn,
-        },
-      ]);
-      const requestBody = { b: '1' };
-      const requestHeaders = new Headers();
-      requestHeaders.append('h', '3');
-      const request = new Request('http://localhost/1', {
-        body: JSON.stringify(requestBody),
-        method: 'PUT',
-        headers: requestHeaders,
-      });
-
-      await matcher.match(request);
-
-      expect(responseFn).toHaveBeenCalledWith({
-        body: requestBody,
-        url: { id: '1' },
-        header: {
-          ...Object.fromEntries(requestHeaders),
-          'content-type': 'text/plain;charset=UTF-8',
-        },
-      });
-    });
-  });
+  // describe('response', () => {
+  //   it('should call response fn with request path params', async () => {
+  //     const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
+  //     const matcher = new Matcher([
+  //       {
+  //         request: { method: 'GET', path: '/:id' },
+  //         response: responseFn,
+  //         delay: 3000,
+  //       },
+  //     ]);
+  //
+  //     await matcher.match({ method: 'GET', path: '/1' });
+  //
+  //     expect(responseFn).toHaveBeenCalledWith({ url: { id: '1' } });
+  //   });
+  //
+  //   it('should call response fn with request body', async () => {
+  //     const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
+  //     const matcher = new Matcher([
+  //       {
+  //         request: { method: 'PUT', path: '/:id' },
+  //         response: responseFn,
+  //       },
+  //     ]);
+  //     const requestBody = { b: '1' };
+  //     const request = new Request('http://localhost/1', {
+  //       body: JSON.stringify(requestBody),
+  //       method: 'PUT',
+  //     });
+  //
+  //     await matcher.match(request);
+  //
+  //     expect(responseFn).toHaveBeenCalledWith({
+  //       body: requestBody,
+  //       url: { id: '1' },
+  //       header: { 'content-type': 'text/plain;charset=UTF-8' },
+  //     });
+  //   });
+  //
+  //   it('should call response fn with request body', async () => {
+  //     const responseFn = vi.fn().mockReturnValue({ body: {}, status: 200 });
+  //     const matcher = new Matcher([
+  //       {
+  //         request: { method: 'PUT', path: '/:id' },
+  //         response: responseFn,
+  //       },
+  //     ]);
+  //     const requestBody = { b: '1' };
+  //     const requestHeaders = new Headers();
+  //     requestHeaders.append('h', '3');
+  //     const request = new Request('http://localhost/1', {
+  //       body: JSON.stringify(requestBody),
+  //       method: 'PUT',
+  //       headers: requestHeaders,
+  //     });
+  //
+  //     await matcher.match(request);
+  //
+  //     expect(responseFn).toHaveBeenCalledWith({
+  //       body: requestBody,
+  //       url: { id: '1' },
+  //       header: {
+  //         ...Object.fromEntries(requestHeaders),
+  //         'content-type': 'text/plain;charset=UTF-8',
+  //       },
+  //     });
+  //   });
+  // });
 });

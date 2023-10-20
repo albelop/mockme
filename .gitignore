@@ -1,5 +1,5 @@
 node_modules
 coverage
 bun.lockb
-**/test/outputs/
+src/sw/test/outputs/
 .idea/

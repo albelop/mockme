@@ -12,11 +12,11 @@ const MockRequestSchema = z.object({
   body: jsonSchema.optional(),
   conditions: z
     .object({
-      url: jsonSchema.optional(),
-      query: jsonSchema.optional(),
-      header: jsonSchema.optional(),
-      cookie: jsonSchema.optional(),
-      body: jsonSchema.optional(),
+      url: jsonSchema.optional(), // pathParams makes sense??
+      query: jsonSchema.optional(), // queryParams
+      header: jsonSchema.optional(), // headers
+      cookie: jsonSchema.optional(), // cookies
+      body: jsonSchema.optional(), // makes sense??
     })
     .optional(),
 });
@@ -24,7 +24,7 @@ const MockRequestSchema = z.object({
 const PlainObjectResponse = z.object({
   headers: jsonSchema.optional(),
   body: jsonSchema.optional(),
-  status: z.number().optional(),
+  status: z.number(),
 });
 
 const MockResponseSchema = z.union([
@@ -34,10 +34,9 @@ const MockResponseSchema = z.union([
 
 export const mockSchema = z.object({
   request: MockRequestSchema,
-  response: MockResponseSchema.optional(),
+  response: MockResponseSchema,
   delay: z.number().optional(),
   scenario: z.string().optional(),
-  // states: z.array(z.record(z.any())).optional(),
 });
 
 export const configSchema = z.object({

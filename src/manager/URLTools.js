@@ -15,10 +15,10 @@ export function getUrl(input) {
  * Gets the current base url for the host formed by protocol, hostname and port
  * @returns {String}
  */
-export function getCurrentBaseUrl() {
-  return `${globalThis.location.protocol}://${globalThis.location.hostname}${
-    globalThis.location.port ? `:${globalThis.location.port}` : ''
-  }`;
+export function getCurrentBaseUrl({
+  url: { protocol, hostname, port } = globalThis.location,
+} = {}) {
+  return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
 }
 
 /**
@@ -45,11 +45,11 @@ export function formatUrl({ protocol, hostname, port }) {
  * @param {String} [origin]
  * @returns {UrlReplacement}
  */
-export function replaceUrl(requestUrl, origin) {
+export function replaceUrl(requestUrl, origin, { url } = {}) {
   const { hostname, port, protocol } = getUrl(requestUrl);
 
   const requestHost = formatUrl({ hostname, port, protocol });
-  const originHost = origin || getCurrentBaseUrl();
+  const originHost = origin || getCurrentBaseUrl({ url });
 
   return { destinationURL: requestUrl.toString().replace(requestHost, originHost), requestHost };
 }

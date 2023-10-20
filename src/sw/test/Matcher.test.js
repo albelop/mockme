@@ -1,14 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { expect } from '@esm-bundle/chai';
+
 import { Matcher } from '../Matcher.js';
 
 describe('Matcher', () => {
   it('should be constructable', () => {
-    expect(new Matcher()).toBeInstanceOf(Matcher);
+    expect(new Matcher()).to.be.instanceOf(Matcher);
   });
 
   it('should validate mocks is an array', () => {
     // @ts-ignore
-    expect(() => new Matcher({})).toThrowError(
+    expect(() => new Matcher({})).to.throw(
       'Matcher expects an array of objects within a mock shape.',
     );
   });
@@ -21,7 +22,7 @@ describe('Matcher', () => {
             name: 'value',
           },
         ]),
-    ).toThrowError('Matcher expects an array of objects within a mock shape.');
+    ).to.throw('Matcher expects an array of objects within a mock shape.');
   });
 
   it('should accept an array of mocks', () => {
@@ -32,7 +33,7 @@ describe('Matcher', () => {
       },
     ]);
 
-    expect(matcher).toBeInstanceOf(Matcher);
+    expect(matcher).to.be.instanceOf(Matcher);
   });
 
   it('should return the map of scenarios', () => {
@@ -61,7 +62,7 @@ describe('Matcher', () => {
       },
     ]);
 
-    expect([...matcher.scenarios.keys()]).toStrictEqual(['a', 'b']);
+    expect([...matcher.scenarios.keys()]).to.be.eql(['a', 'b']);
   });
 
   describe('match', () => {
@@ -79,7 +80,7 @@ describe('Matcher', () => {
 
       const mock = await matcher.match(request);
 
-      expect(mock).toBeUndefined();
+      expect(mock).to.be.undefined;
     });
 
     it('should match a mock by method and path', async () => {
@@ -92,7 +93,7 @@ describe('Matcher', () => {
 
       const mock = await matcher.match(new Request('https://example.com', { method: 'GET' }));
 
-      expect(mock).not.toBeUndefined();
+      expect(mock).not.to.be.undefined;
     });
 
     it('should match a mock by method, path and header', async () => {
@@ -115,7 +116,7 @@ describe('Matcher', () => {
 
       const response = await mock.getResponse();
 
-      expect(response).toHaveProperty('status', 200);
+      expect(response).to.have.property('status', 200);
     });
 
     it('should match a mock by method, path, header and url', async () => {
@@ -138,7 +139,7 @@ describe('Matcher', () => {
 
       const response = await mock.getResponse();
 
-      expect(response).toHaveProperty('status', 200);
+      expect(response).to.have.property('status', 200);
     });
 
     it('should match a mock by method, path and cookie', async () => {
@@ -163,7 +164,7 @@ describe('Matcher', () => {
 
       const response = await mock.getResponse();
 
-      expect(response).toHaveProperty('status', 200);
+      expect(response).to.have.property('status', 200);
     });
 
     it('should match a mock by method, path, headers, cookie, url, query, queryParam, param and body', async () => {
@@ -201,7 +202,7 @@ describe('Matcher', () => {
 
       const response = await mock.getResponse();
 
-      expect(response).toHaveProperty('status', 200);
+      expect(response).to.have.property('status', 200);
     });
 
     it('should match by scenario', async () => {
@@ -241,7 +242,7 @@ describe('Matcher', () => {
       const response = await mock.getResponse();
       const body = await response.json();
 
-      expect(body).toStrictEqual({ scenario: 'b' });
+      expect(body).to.be.eql({ scenario: 'b' });
     });
 
     it('should match default if no mock set for specific scenario', async () => {
@@ -278,7 +279,7 @@ describe('Matcher', () => {
 
       const body = await response.json();
 
-      expect(body).toStrictEqual({ scenario: 'no scenario' });
+      expect(body).to.be.eql({ scenario: 'no scenario' });
     });
 
     it('should return a delayed response', async () => {
@@ -309,7 +310,7 @@ describe('Matcher', () => {
 
       const perf = performance.measure('delay', 'delay-start', 'delay-end');
 
-      expect(Math.round(perf.duration)).toBeGreaterThanOrEqual(delay);
+      expect(Math.round(perf.duration) >= delay).to.be.true;
     });
 
     it('should throw if scenario is not valid', () => {
@@ -329,7 +330,7 @@ describe('Matcher', () => {
 
       expect(() => {
         matcher.enableScenario('b');
-      }).toThrow('The specified scenario b is not used by the loaded mocks.');
+      }).to.throw('The specified scenario b is not used by the loaded mocks.');
     });
 
     it('can be called with a Request instance', async () => {
@@ -347,11 +348,11 @@ describe('Matcher', () => {
         },
       ]);
 
-      const mock = await matcher.match(new Request('http:/test.com/test'));
+      const mock = await matcher.match(new Request('https://test.com/test'));
       const response = await mock.getResponse();
       const result = await response.json();
 
-      expect(result).toEqual(body);
+      expect(result).to.eql(body);
     });
   });
 

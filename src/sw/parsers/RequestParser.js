@@ -75,8 +75,8 @@ export class RequestParser {
   static async #getBody(request) {
     const headers = RequestParser.#getHeaders(request);
 
-    if (headers.get('content-length')) {
-      const contentType = headers.get('content-type') || '';
+    if (headers.has('content-type')) {
+      const contentType = headers.get('content-type');
 
       if (contentType.includes('text/plain')) {
         return request.text();

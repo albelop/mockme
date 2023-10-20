@@ -1,14 +1,21 @@
-import { describe, expect, it } from 'vitest';
+import { expect } from '@esm-bundle/chai';
+import { isEqual } from 'lodash-es';
 
 import { RequestParser } from '../RequestParser.js';
-import { areEqualMaps } from '../../utils.js';
 
 describe('RequestParser', () => {
   describe('parse', () => {
     it(`should throw an Error if the object to parse is not a Request instance`, async () => {
       for (const value of [{}, 1, 'string', [], undefined, null]) {
-        // eslint-disable-next-line no-await-in-loop
-        await expect(() => RequestParser.parse(value)).rejects.toThrowError();
+        let error;
+
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await RequestParser.parse(value);
+        } catch (e) {
+          error = e;
+        }
+        expect(error).to.be.instanceOf(Error);
       }
     });
 
@@ -23,7 +30,7 @@ describe('RequestParser', () => {
 
         const { path } = await RequestParser.parse(request);
 
-        expect(path).toBe(pathname);
+        expect(path).to.eq(pathname);
       });
     });
 
@@ -35,7 +42,7 @@ describe('RequestParser', () => {
 
         const { method } = await RequestParser.parse(request);
 
-        expect(method).toBe(requestMethod);
+        expect(method).to.eq(requestMethod);
       });
     });
 
@@ -55,7 +62,7 @@ describe('RequestParser', () => {
 
         const { queryParams } = await RequestParser.parse(request);
 
-        expect(areEqualMaps(queryParams, new Map(entries))).toBeTruthy();
+        expect(isEqual(queryParams, new Map(entries))).to.be.true;
       });
     });
 
@@ -77,7 +84,7 @@ describe('RequestParser', () => {
 
         const { headers } = await RequestParser.parse(request);
 
-        expect(areEqualMaps(headers, new Map(entries))).toBeTruthy();
+        expect(isEqual(headers, new Map(entries))).to.be.true;
       });
     });
 
@@ -86,16 +93,15 @@ describe('RequestParser', () => {
       const textBody = JSON.stringify(jsonBody);
       const request = new Request(`https://ing.es`, {
         method: 'POST',
-        headers: {
+        headers: new Headers({
           'Content-Type': 'application/json',
-          'Content-Length': textBody.length,
-        },
+        }),
         body: textBody,
       });
 
       const { body } = await RequestParser.parse(request);
 
-      expect(body).toStrictEqual(jsonBody);
+      expect(body).to.eql(jsonBody);
     });
 
     it(`should obtain the request text body`, async () => {
@@ -104,14 +110,13 @@ describe('RequestParser', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
-          'Content-Length': textBody.length,
         },
         body: textBody,
       });
 
       const { body } = await RequestParser.parse(request);
 
-      expect(body).toStrictEqual(textBody);
+      expect(body).to.eq(textBody);
     });
 
     it(`should obtain the request form body`, async () => {
@@ -121,7 +126,6 @@ describe('RequestParser', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Content-Length': 100,
         },
         body: formData,
       });
@@ -129,7 +133,7 @@ describe('RequestParser', () => {
 
       const { body } = await RequestParser.parse(request);
 
-      expect(body).toStrictEqual(formData);
+      expect(body).to.eq(formData);
     });
 
     ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].forEach((method) => {
@@ -139,14 +143,13 @@ describe('RequestParser', () => {
           method,
           headers: {
             'Content-Type': 'text/plain',
-            'Content-Length': requestBody.length,
           },
           body: requestBody,
         });
 
         const { body } = await RequestParser.parse(request);
 
-        expect(body).toBe(requestBody);
+        expect(body).to.eq(requestBody);
       });
     });
   });

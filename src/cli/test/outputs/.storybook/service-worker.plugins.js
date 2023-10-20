@@ -1496,22 +1496,6 @@ function pathToRegexp(path, keys2, options) {
   return stringToRegexp(path, keys2, options);
 }
 
-// node_modules/cookie-muncher/dist/index.mjs
-var l = ((o) => (
-  (o[(o.Now = -1)] = 'Now'),
-  (o[(o.OneHour = 3600)] = 'OneHour'),
-  (o[(o.SixHours = 21600)] = 'SixHours'),
-  (o[(o.TwlveHours = 43200)] = 'TwlveHours'),
-  (o[(o.OneDay = 86400)] = 'OneDay'),
-  (o[(o.OneWeek = 604800)] = 'OneWeek'),
-  (o[(o.TwoWeeks = 1209600)] = 'TwoWeeks'),
-  (o[(o.OneMonth = 2592e3)] = 'OneMonth'),
-  (o[(o.ThreeMonths = 7776e3)] = 'ThreeMonths'),
-  (o[(o.SixMonths = 15552e3)] = 'SixMonths'),
-  (o[(o.OneYear = 31536e3)] = 'OneYear'),
-  o
-))(l || {});
-
 // node_modules/zod/lib/index.mjs
 var util;
 (function (util2) {
@@ -5480,8 +5464,8 @@ var RequestParser = class _RequestParser {
    */
   static async #getBody(request) {
     const headers = _RequestParser.#getHeaders(request);
-    if (headers.get('content-length')) {
-      const contentType = headers.get('content-type') || '';
+    if (headers.has('content-type')) {
+      const contentType = headers.get('content-type');
       if (contentType.includes('text/plain')) {
         return request.text();
       }

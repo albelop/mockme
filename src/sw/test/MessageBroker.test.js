@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { expect } from '@esm-bundle/chai';
+import { stub } from 'sinon';
 
 import { MessageBroker } from '../MessageBroker.js';
 
@@ -8,18 +9,9 @@ const nextTick = () =>
   });
 
 const createBroadcastChannel = () => ({
-  postMessage: vi.fn(),
-  close: vi.fn(),
+  postMessage: stub(),
+  close: stub(),
 });
-
-const createMessageBrokers = () => {
-  const { port1, port2 } = new MessageChannel();
-
-  return {
-    broker: new MessageBroker({ broadcastChannel: port2 }),
-    client: new MessageBroker({ broadcastChannel: port1 }),
-  };
-};
 
 describe('MessageBroker', () => {
   it('should be constructable', async () => {
@@ -38,7 +30,7 @@ describe('MessageBroker', () => {
 
     broker.close();
 
-    expect(broadcastChannel.close).toBeCalled();
+    expect(broadcastChannel.close.calledOnce).to.be.true;
   });
 
   it('should be able to send a message to enable a scenario', async () => {
@@ -47,25 +39,30 @@ describe('MessageBroker', () => {
 
     broker.enableScenario('test');
 
-    expect(broadcastChannel.postMessage).toBeCalledWith({
-      type: 'enable-scenario',
-      scenario: 'test',
-    });
+    expect(
+      broadcastChannel.postMessage.calledOnceWithExactly({
+        type: 'enable-scenario',
+        scenario: 'test',
+      }),
+    ).to.be.true;
   });
 
   it('should call the enable scenario listener when an enable scenario message is sent', async () => {
-    const { client, broker } = createMessageBrokers();
+    // const { client, broker } = createMessageBrokers();
+    const broker = new MessageBroker();
+    const client = new MessageBroker();
 
     try {
-      const listener = vi.fn();
+      const listener = stub();
       client.addEnableScenarioListener(listener);
 
       broker.enableScenario('test');
 
       await nextTick();
 
-      expect(listener).toBeCalledWith({ scenario: 'test' });
+      expect(listener.calledOnceWithExactly({ scenario: 'test' })).to.be.true;
     } finally {
+      client.close();
       broker.close();
     }
   });
@@ -76,25 +73,29 @@ describe('MessageBroker', () => {
 
     broker.disableScenario('test');
 
-    expect(broadcastChannel.postMessage).toBeCalledWith({
-      type: 'disable-scenario',
-      scenario: 'test',
-    });
+    expect(
+      broadcastChannel.postMessage.calledOnceWithExactly({
+        type: 'disable-scenario',
+        scenario: 'test',
+      }),
+    ).to.be.true;
   });
 
   it('should call the disable scenario listener when a disable scenario message is sent', async () => {
-    const { client, broker } = createMessageBrokers();
+    const broker = new MessageBroker();
+    const client = new MessageBroker();
 
     try {
-      const listener = vi.fn();
+      const listener = stub();
       client.addDisableScenarioListener(listener);
 
       broker.disableScenario('test');
 
       await nextTick();
 
-      expect(listener).toBeCalledWith({ scenario: 'test' });
+      expect(listener.calledOnceWithExactly({ scenario: 'test' })).to.be.true;
     } finally {
+      client.close();
       broker.close();
     }
   });
@@ -105,29 +106,35 @@ describe('MessageBroker', () => {
 
     broker.setCookie('test', 'test-value');
 
-    expect(broadcastChannel.postMessage).toBeCalledWith({
-      type: 'set-cookie',
-      name: 'test',
-      value: 'test-value',
-    });
+    expect(
+      broadcastChannel.postMessage.calledOnceWithExactly({
+        type: 'set-cookie',
+        name: 'test',
+        value: 'test-value',
+      }),
+    ).to.be.true;
   });
 
   it('should call the set cookie listener when a set cookie message is sent', async () => {
-    const { client, broker } = createMessageBrokers();
+    const broker = new MessageBroker();
+    const client = new MessageBroker();
 
     try {
-      const listener = vi.fn();
+      const listener = stub();
       client.addSetCookieListener(listener);
 
       broker.setCookie('test', 'test-value');
 
       await nextTick();
 
-      expect(listener).toBeCalledWith({
-        name: 'test',
-        value: 'test-value',
-      });
+      expect(
+        listener.calledOnceWithExactly({
+          name: 'test',
+          value: 'test-value',
+        }),
+      ).to.be.true;
     } finally {
+      client.close();
       broker.close();
     }
   });
@@ -138,27 +145,33 @@ describe('MessageBroker', () => {
 
     broker.removeCookie('test');
 
-    expect(broadcastChannel.postMessage).toBeCalledWith({
-      type: 'remove-cookie',
-      name: 'test',
-    });
+    expect(
+      broadcastChannel.postMessage.calledOnceWithExactly({
+        type: 'remove-cookie',
+        name: 'test',
+      }),
+    ).to.be.true;
   });
 
   it('should call the remove cookie listener when a remove cookie message is sent', async () => {
-    const { client, broker } = createMessageBrokers();
+    const broker = new MessageBroker();
+    const client = new MessageBroker();
 
     try {
-      const listener = vi.fn();
+      const listener = stub();
       client.addRemoveCookieListener(listener);
 
       broker.removeCookie('test');
 
       await nextTick();
 
-      expect(listener).toBeCalledWith({
-        name: 'test',
-      });
+      expect(
+        listener.calledOnceWithExactly({
+          name: 'test',
+        }),
+      ).to.be.true;
     } finally {
+      client.close();
       broker.close();
     }
   });
@@ -169,24 +182,28 @@ describe('MessageBroker', () => {
 
     broker.askForConfig();
 
-    expect(broadcastChannel.postMessage).toBeCalledWith({
-      type: 'ask-for-config',
-    });
+    expect(
+      broadcastChannel.postMessage.calledOnceWithExactly({
+        type: 'ask-for-config',
+      }),
+    ).to.be.true;
   });
 
   it('should call the ask for service-worker listener when an ask for service-worker message is sent', async () => {
-    const { client, broker } = createMessageBrokers();
+    const broker = new MessageBroker();
+    const client = new MessageBroker();
 
     try {
-      const listener = vi.fn();
+      const listener = stub();
       client.addAskForConfigListener(listener);
 
       broker.askForConfig();
 
       await nextTick();
 
-      expect(listener).toBeCalledWith({});
+      expect(listener.calledOnceWithExactly({})).to.be.true;
     } finally {
+      client.close();
       broker.close();
     }
   });
@@ -197,27 +214,33 @@ describe('MessageBroker', () => {
 
     broker.sendConfig({});
 
-    expect(broadcastChannel.postMessage).toBeCalledWith({
-      type: 'send-config',
-      config: {},
-    });
+    expect(
+      broadcastChannel.postMessage.calledOnceWithExactly({
+        type: 'send-config',
+        config: {},
+      }),
+    ).to.be.true;
   });
 
   it('should call the send service-worker listener when a send service-worker message is sent', async () => {
-    const { client, broker } = createMessageBrokers();
+    const broker = new MessageBroker();
+    const client = new MessageBroker();
 
     try {
-      const listener = vi.fn();
+      const listener = stub();
       client.addSendConfigListener(listener);
 
       broker.sendConfig({});
 
       await nextTick();
 
-      expect(listener).toBeCalledWith({
-        config: {},
-      });
+      expect(
+        listener.calledOnceWithExactly({
+          config: {},
+        }),
+      ).to.be.true;
     } finally {
+      client.close();
       broker.close();
     }
   });

@@ -5,7 +5,8 @@ module.exports = {
   },
   env: {
     node: true,
-    browser: false,
+    browser: true,
+    mocha: true,
   },
   rules: {
     'no-restricted-syntax': [
@@ -62,9 +63,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: [
-        '**/test/**/*.{html,js,mjs,ts}',
-      ],
+      files: ['**/test/**/*.{html,js,mjs,ts}'],
       rules: {
         'no-console': 'off',
         'no-unused-expressions': 'off',
@@ -77,5 +76,5 @@ module.exports = {
     ecmaVersion: 2022,
     sourceType: 'module',
     requireConfigFile: false,
-  }
+  },
 };

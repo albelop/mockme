@@ -1,110 +1,125 @@
-import { describe, expect, it, vi } from 'vitest';
+import { expect } from '@esm-bundle/chai';
+import { stub, spy } from 'sinon';
+
 import { ServiceWorkerManager } from '../ServiceWorkerManager.js';
+import { getCurrentBaseUrl } from '../URLTools.js';
 
 describe('ServiceWorkerManager', () => {
+  const nativeFetch = globalThis.fetch;
+  const nativeXHR = globalThis.XMLHttpRequest;
+
+  afterEach(() => {
+    globalThis.fetch = nativeFetch;
+    globalThis.XMLHttpRequest = nativeXHR;
+  });
+
   it('should register service worker', () => {
     const serviceWorkerFile = './service-worker-file.js';
     const serviceWorker = {
-      register: vi.fn(),
-      ready: Promise.resolve({ update: vi.fn() }),
+      register: stub(),
+      ready: Promise.resolve({ update: stub() }),
     };
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
-
-    // @ts-ignore
-    const swm = new ServiceWorkerManager({ serviceWorker, overrideCalls: false });
-    swm.register(serviceWorkerFile);
-
-    expect(serviceWorker.register).toBeCalledWith(serviceWorkerFile, {
-      type: 'module',
-      updateViaCache: 'none',
-    });
-  });
-
-  it('should log an error if Service Workers are not supported', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error');
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
-
-    // @ts-ignore
-    const swm = new ServiceWorkerManager({ serviceWorker: null });
-    swm.register();
-
-    expect(consoleErrorSpy).toBeCalledWith('Service workers are not supported');
-  });
-
-  it('should log an error if serviceWorker registration fails', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error');
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
 
     // @ts-ignore
     const swm = new ServiceWorkerManager({
-      // @ts-ignore
-      serviceWorker: {
-        register: () => {
-          throw Error('registration error');
-        },
-        // @ts-ignore
-        ready: Promise.resolve({ update: vi.fn() }),
-      },
+      serviceWorker,
+      hostname: getCurrentBaseUrl({ url: new URL('http://localhost') }),
     });
+    swm.register(serviceWorkerFile);
 
-    swm.register();
+    expect(
+      serviceWorker.register.calledOnceWithExactly(serviceWorkerFile, {
+        type: 'module',
+        updateViaCache: 'none',
+      }),
+    ).to.be.true;
+  });
 
-    expect(consoleErrorSpy).toBeCalledWith(
-      'Service worker registration failed: Error: registration error',
-    );
+  it('should log an error if Service Workers are not supported', () => {
+    const consoleErrorSpy = spy(console, 'error');
+
+    try {
+      const swm = new ServiceWorkerManager({
+        serviceWorker: null,
+        hostname: getCurrentBaseUrl({ url: new URL('http://localhost') }),
+      });
+
+      swm.register();
+
+      expect(consoleErrorSpy.calledOnceWithExactly('Service workers are not supported')).to.be.true;
+    } finally {
+      consoleErrorSpy.restore();
+    }
+  });
+
+  it('should log an error if serviceWorker registration fails', () => {
+    const consoleErrorSpy = spy(console, 'error');
+
+    try {
+      const swm = new ServiceWorkerManager({
+        // @ts-ignore
+        serviceWorker: {
+          register: () => {
+            throw Error('registration error');
+          },
+          // @ts-ignore
+          ready: Promise.resolve({ update: stub() }),
+        },
+        hostname: getCurrentBaseUrl({ url: new URL('http://localhost') }),
+      });
+
+      swm.register();
+
+      expect(
+        consoleErrorSpy.calledOnceWithExactly(
+          'Service worker registration failed: Error: registration error',
+        ),
+      ).to.be.true;
+    } finally {
+      consoleErrorSpy.restore();
+    }
   });
 
   it('should override fetch calls', async () => {
-    const fetchStub = vi.fn();
+    const fetchStub = stub();
     globalThis.fetch = fetchStub;
-    const serviceWorker = {
-      register: vi.fn(),
-      ready: Promise.resolve({ update: vi.fn() }),
-    };
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
 
-    // @ts-ignore
+    const serviceWorker = {
+      register: stub(),
+      ready: Promise.resolve({ update: stub() }),
+    };
+
     // eslint-disable-next-line no-new
-    new ServiceWorkerManager({ serviceWorker });
+    new ServiceWorkerManager({
+      serviceWorker,
+      hostname: getCurrentBaseUrl({ url: new URL('http://localhost') }),
+    });
 
     await fetch('http://test.com/test');
 
-    expect(fetchStub).toHaveBeenCalledOnce();
+    expect(fetchStub.calledOnce).to.be.true;
   });
 
-  it('should override fetch calls', async () => {
-    const XHROpenStub = vi.fn();
-    const serviceWorker = {
-      register: vi.fn(),
-      ready: Promise.resolve({ update: vi.fn() }),
-    };
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
+  it('should override XHR calls', async () => {
+    const openStub = stub();
     globalThis.XMLHttpRequest = class {
-      open = XHROpenStub;
+      open = openStub;
     };
 
-    // @ts-ignore
-    // eslint-disable-next-line no-new
-    new ServiceWorkerManager({ serviceWorker });
+    const serviceWorker = {
+      register: stub(),
+      ready: Promise.resolve({ update: stub() }),
+    };
 
-    // eslint-disable-next-line no-undef
+    // eslint-disable-next-line no-new
+    new ServiceWorkerManager({
+      serviceWorker,
+      hostname: getCurrentBaseUrl({ url: new URL('http://localhost') }),
+    });
+
     const xhr = new XMLHttpRequest();
     xhr.open('GET', 'http://test.com/test');
 
-    expect(XHROpenStub).toHaveBeenCalledOnce();
+    expect(openStub.calledOnce).to.be.true;
   });
 });

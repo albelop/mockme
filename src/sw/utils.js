@@ -19,18 +19,3 @@ export const isContainedMap = (first, second) => {
 
   return false;
 };
-
-/**
- * Compares two Maps.
- *
- * @param {Map<string, any>} first
- * @param {Map<string, any>} second
- * @returns {boolean}
- */
-export const areEqualMaps = (first, second = new Map()) => {
-  if (first === second) {
-    return true;
-  }
-
-  return first.size === second.size && isContainedMap(first, second);
-};

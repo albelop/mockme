@@ -1,4 +1,5 @@
 import { getUrl, replaceUrl, getCurrentBaseUrl } from './URLTools.js';
+import { MessageBroker } from '../sw/MessageBroker.js';
 
 const MOCKME_HOSTNAME_HEADER = 'X-Mockme-Hostname';
 
@@ -15,6 +16,8 @@ export class ServiceWorkerManager {
   /** @type { String } */
   #hostname;
 
+  #messageBroker;
+
   /**
    * @param {Object} [options]
    * @param {Console} [options.console]
@@ -26,9 +29,11 @@ export class ServiceWorkerManager {
     // eslint-disable-next-line no-undef
     serviceWorker = navigator.serviceWorker,
     hostname = getCurrentBaseUrl(),
+    messageBroker = new MessageBroker(),
   } = {}) {
     this.#console = console;
     this.#serviceWorker = serviceWorker;
+    this.#messageBroker = messageBroker;
 
     // Store current hostname with port
     this.#hostname = hostname;
@@ -97,6 +102,15 @@ export class ServiceWorkerManager {
         await this.#serviceWorker.register(serviceWorkerFile, {
           type: 'module',
           updateViaCache: 'none',
+        });
+
+        const done = setInterval(() => this.#messageBroker.askForConfig(), 10);
+
+        await new Promise((resolve) => {
+          this.#messageBroker.addSendConfigListener((config) => {
+            clearTimeout(done);
+            resolve(config);
+          });
         });
       } catch (error) {
         this.#console.error(`Service worker registration failed: ${error}`);

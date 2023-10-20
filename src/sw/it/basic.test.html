@@ -1,0 +1,42 @@
+<html>
+<body>
+<script type="module">
+  import { runTests } from '@web/test-runner-mocha';
+  import { expect } from '@esm-bundle/chai';
+  import { ServiceWorkerManager } from "../../manager/ServiceWorkerManager.js";
+
+  const manager = new ServiceWorkerManager();
+
+  const sendXHR = async (type, url) => new Promise(resolve => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open(type, url, true);
+    xhr.send();
+    xhr.onreadystatechange = function() {
+      if (this.status === 200 && this.readyState === 4) {
+        resolve(this.response);
+      }
+    };
+  });
+
+  const getUrl = path => {
+    const { protocol, hostname, port } = globalThis.location;
+
+    return new URL(`${protocol}//${hostname}${port ? `:${port}` : ''}${path}`);
+  }
+
+  runTests(async () => {
+    await manager.register('./basic.sw.js');
+
+    // write your tests inline
+    describe('HTML tests', () => {
+      it('works', async () => {
+        const result = await sendXHR('GET', getUrl('/src/sw/it/test'));
+
+        expect(JSON.parse(result)).to.be.eql({message: 'ok'});
+      });
+    });
+  });
+</script>
+</body>
+</html>

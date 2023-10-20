@@ -33,6 +33,10 @@ export default function serviceWorker(sw, mocks) {
     sendConfig();
   });
 
+  sw.addEventListener('install', () => sw.skipWaiting());
+
+  sw.addEventListener('activate', (event) => event.waitUntil(sw.clients.claim()));
+
   sw.addEventListener('fetch', async (event) => {
     const { request } = event;
     const path = new URL(request.url).pathname;
@@ -47,4 +51,6 @@ export default function serviceWorker(sw, mocks) {
       );
     }
   });
+
+  sendConfig();
 }

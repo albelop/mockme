@@ -1,5 +1,16 @@
 # @betheweb/mockme
 
+## 0.3.0
+
+### Minor Changes
+
+- 08ff8f9: New ServiceWorkerManager to handle service worker registration. Use ServiceWorkerManager.register() to do the setup.
+- 8a7a7ac: Enable change of scenario through the ServiceWorkerManager
+
+### Patch Changes
+
+- b8a5e51: match response should be in the respondWith promise
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,17 +1,20 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ServiceWorkerManager } from '../ServiceWorkerManager.js';
 
 describe('ServiceWorkerManager', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('should register service worker', () => {
     const serviceWorkerFile = './service-worker-file.js';
     const serviceWorker = {
       register: vi.fn(),
       ready: Promise.resolve({ update: vi.fn() }),
     };
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
+
+    vi.stubGlobal('location', { protocol: 'http', hostname: 'localhost' });
+    vi.stubGlobal('XMLHttpRequest', { prototype: { open: vi.fn() } });
 
     // @ts-ignore
     const swm = new ServiceWorkerManager({ serviceWorker, overrideCalls: false });
@@ -25,10 +28,9 @@ describe('ServiceWorkerManager', () => {
 
   it('should log an error if Service Workers are not supported', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error');
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
+
+    vi.stubGlobal('location', { protocol: 'http', hostname: 'localhost' });
+    vi.stubGlobal('XMLHttpRequest', { prototype: { open: vi.fn() } });
 
     // @ts-ignore
     const swm = new ServiceWorkerManager({ serviceWorker: null });
@@ -39,10 +41,9 @@ describe('ServiceWorkerManager', () => {
 
   it('should log an error if serviceWorker registration fails', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error');
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
+
+    vi.stubGlobal('location', { protocol: 'http', hostname: 'localhost' });
+    vi.stubGlobal('XMLHttpRequest', { prototype: { open: vi.fn() } });
 
     // @ts-ignore
     const swm = new ServiceWorkerManager({
@@ -70,10 +71,9 @@ describe('ServiceWorkerManager', () => {
       register: vi.fn(),
       ready: Promise.resolve({ update: vi.fn() }),
     };
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = { prototype: { open: vi.fn() } };
+
+    vi.stubGlobal('location', { protocol: 'http', hostname: 'localhost' });
+    vi.stubGlobal('XMLHttpRequest', { prototype: { open: vi.fn() } });
 
     // @ts-ignore
     // eslint-disable-next-line no-new
@@ -90,12 +90,13 @@ describe('ServiceWorkerManager', () => {
       register: vi.fn(),
       ready: Promise.resolve({ update: vi.fn() }),
     };
-    // @ts-ignore
-    globalThis.location = { protocol: 'http', hostname: 'localhost' };
-    // @ts-ignore
-    globalThis.XMLHttpRequest = class {
-      open = XHROpenStub;
-    };
+    vi.stubGlobal('location', { protocol: 'http', hostname: 'localhost' });
+    vi.stubGlobal(
+      'XMLHttpRequest',
+      class {
+        open = XHROpenStub;
+      },
+    );
 
     // @ts-ignore
     // eslint-disable-next-line no-new

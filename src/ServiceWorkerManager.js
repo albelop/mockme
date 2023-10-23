@@ -1,4 +1,5 @@
 import { getUrl, replaceUrl } from './URLTools.js';
+import { changeScenario } from './serviceWorker.js';
 
 const MOCKME_HOSTNAME_HEADER = 'X-Mockme-Hostname';
 
@@ -107,5 +108,10 @@ export class ServiceWorkerManager {
     } else {
       this.#console.error(`Service workers are not supported`);
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  selectScenario(scenario) {
+    changeScenario(scenario);
   }
 }

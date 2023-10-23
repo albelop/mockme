@@ -1,24 +1,28 @@
 /**
+ * Gets the current base url for the host formed by protocol, hostname and port
+ * @returns {String}
+ */
+export function getCurrentBaseUrl() {
+  return `${globalThis.location.protocol}//${globalThis.location.hostname}${
+    globalThis.location.port ? `:${globalThis.location.port}` : ''
+  }`;
+}
+
+/**
  *
  * @param {Request|URL|String} input
  * @returns {URL}
  */
 export function getUrl(input) {
+  if (input instanceof URL) return input;
   if (input instanceof Request) {
     return new URL(input.url);
   }
+  if (input.indexOf('://') !== -1) {
+    return new URL(input);
+  }
 
-  return new URL(input);
-}
-
-/**
- * Gets the current base url for the host formed by protocol, hostname and port
- * @returns {String}
- */
-export function getCurrentBaseUrl() {
-  return `${globalThis.location.protocol}://${globalThis.location.hostname}${
-    globalThis.location.port ? `:${globalThis.location.port}` : ''
-  }`;
+  return new URL(input, getCurrentBaseUrl());
 }
 
 /**

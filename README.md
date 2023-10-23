@@ -35,7 +35,7 @@ $ pnpm add -D @betheweb/mockme
 The config file `mockme.config.mjs` should be placed in the root of your project. Here is an example:
 
 ```js
-import mockmeJsPlugin from '@betheweb/mockme-js-plugin';
+import mockmeJsPlugin from '@betheweb/mockme-plugin-js';
 
 export default {
   output: 'demo/service-worker.js',
@@ -50,7 +50,7 @@ export default {
 If you have the different scenarios for your mocks, mockme can generate an **scenarios.js** file that will include the list of scenarios. Include the scenarios output it in your config:
 
 ```js
-import mockmeJsPlugin from '@betheweb/mockme-js-plugin';
+import mockmeJsPlugin from '@betheweb/mockme-plugin-js';
 
 export default {
   output: 'demo/service-worker.js',

@@ -1,7 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { formatUrl, getCurrentBaseUrl, getUrl, replaceUrl } from '../URLTools.js';
 
 describe('URL Tools', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals;
+  });
+
   describe('getUrl', () => {
     it('should return URL instance for a Request', () => {
       const result = getUrl(new Request('http://test.com'));
@@ -14,6 +18,7 @@ describe('URL Tools', () => {
     });
 
     it('should return URL instance for a String', () => {
+      vi.stubGlobal('location', { protocol: 'http:', hostname: 'localhost', port: '200' });
       const result = getUrl('http://test.com');
       expect(result).instanceOf(URL);
     });
@@ -35,7 +40,7 @@ describe('URL Tools', () => {
 
     it('should use global location if no origin passed', () => {
       // @ts-ignore
-      globalThis.location = { protocol: 'http', hostname: 'localhost', port: '200' };
+      vi.stubGlobal('location', { protocol: 'http:', hostname: 'localhost', port: '200' });
       expect(replaceUrl('http://test.com:1000/test')).toEqual({
         destinationURL: 'http://localhost:200/test',
         requestHost: 'http://test.com:1000',
@@ -46,14 +51,14 @@ describe('URL Tools', () => {
   describe('getCurrentBaseUrl', () => {
     it('should return the current base url from the globalThis.location', () => {
       // @ts-ignore
-      globalThis.location = { protocol: 'http', hostname: 'localhost', port: '300' };
+      vi.stubGlobal('location', { protocol: 'http:', hostname: 'localhost', port: '300' });
 
       expect(getCurrentBaseUrl()).toBe('http://localhost:300');
     });
 
     it('should return the current base url from the globalThis.location without port', () => {
       // @ts-ignore
-      globalThis.location = { protocol: 'http', hostname: 'localhost' };
+      vi.stubGlobal('location', { protocol: 'http:', hostname: 'localhost' });
 
       expect(getCurrentBaseUrl()).toBe('http://localhost');
     });

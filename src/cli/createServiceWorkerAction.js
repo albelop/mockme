@@ -1,6 +1,7 @@
 import * as esbuild from 'esbuild';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { mockSchema } from '../schemas.js';
 import { LoggerFactory } from '../LoggerFactory.js';
@@ -128,7 +129,7 @@ async function writeScenariosFile(output, content) {
  */
 const getConfig = async (configFileName) => {
   try {
-    return (await import(join(process.cwd(), configFileName)))?.default;
+    return (await import(pathToFileURL(join(process.cwd(), configFileName)).toString()))?.default;
   } catch (error) {
     throw Error(`Could not find config file at ${join(process.cwd(), configFileName)}`);
   }

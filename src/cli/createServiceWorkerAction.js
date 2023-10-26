@@ -60,13 +60,13 @@ function generateMocksString(mocks = []) {
 function generateScenariosString(mocks = []) {
   const scenarios = [...mocks.values()].reduce((result, { scenario }) => {
     if (scenario) {
-      result.push(scenario);
+      result.add(scenario);
     }
 
     return result;
-  }, []);
+  }, new Set());
 
-  return `export default ${JSON.stringify(scenarios)};`;
+  return `export default ${JSON.stringify([...scenarios])};`;
 }
 
 function generateServiceWorkerContent(string, replacements) {

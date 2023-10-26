@@ -1,5 +1,12 @@
 # @betheweb/mockme
 
+## 0.3.1
+
+### Patch Changes
+
+- eefe109: Fix config file import on windows file system
+- 1637a2a: Same scenario in multiple mocks is only listed once in the scenarios output
+
 ## 0.3.0
 
 ### Minor Changes

@@ -65,7 +65,7 @@ function matchConditions({ header, cookie, body, query, url }, request) {
     containedObjects(header, request.conditions?.header) &&
     compareObjects(cookie, request.conditions?.cookie) &&
     compareObjects(body, request.conditions?.body) &&
-    compareObjects(query, request.conditions?.query)
+    containedObjects(query, request.conditions?.query)
   );
 }
 

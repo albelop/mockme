@@ -71,7 +71,8 @@ function matchConditions({ header, cookie, body, query, url }, request) {
 
 async function parseRequest(request = {}) {
   if (request instanceof Request) {
-    const path = new URL(request.url).pathname;
+    const url = new URL(request.url);
+    const path = url.pathname;
 
     const requestOptions = {
       path,
@@ -80,7 +81,7 @@ async function parseRequest(request = {}) {
 
     requestOptions.query = Object.fromEntries(
       // @ts-ignore
-      new URLSearchParams(request.url.search)?.entries(),
+      new URLSearchParams(url.search)?.entries(),
     );
 
     const headers = Object.fromEntries(request.headers.entries());
